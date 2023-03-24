@@ -61,5 +61,6 @@
 		system sends you and the human an email, or text, with the details of the tag. Give the human a link to contest tag.
 
 4) on a contested tag, system contacts a configuragle perm level so moderaters can settle dispute. Tag is still registerd.
+	This should give the mods a good line, "If you have a problem with the tag, register it and dispute the tag. Our website will reach out to a mod and we will settle the dispute". should cut down on arguments a bit.
 	
 		
