@@ -1,0 +1,87 @@
++ Website Outline +
+
+
+General pages (can be accessed by normal users from the home page)
+	
+	in the upper right hand of the page display the name/tag_code or login/sign up button.
+	
+	Home page
+		all the info on the current home page
+	
+
+	Account page
+		allows the user to view the below data:
+		  data item (y/n, can or cannot edit)
+		- A-number  (n)
+		- callsign (y)
+		- linked discord account (y)
+		- email (y) (default to the gmail they logged in with)
+		- phone_number (y)
+		- 2FA status (y)
+		- tag data that involves you from all games (n)
+		- any equipment currently registered to you (n)
+		- whether there is currently an active game (n)
+		- whether you are registerd for a game (y, you may leave the game your in)
+		- your current states (n)
+		- your current roles (n)
+		- your tag_code (n)
+		- perfered contact method (y, options are all contact info we have or all)
+
+	list of tags page
+		a list of tags with the most recent tag at the top
+	
+	login page
+		login via google
+		login via discord (?)
+		option to set up 2FA. (this is easy, i already have most of the code)
+		
+	
+	sign up account page
+		Required info:
+		- callsign
+		- first name
+		- last name
+		- email
+		- phone number (optional, if we can set up texing alerts https://www.twilio.com/sms/pricing/us)
+		- A-number
+		
+		Other things to do:
+		- link discord account
+		
+
+
+admin pages can be accessed by admins and sometimes normal users
+
+	Code pages 
+		for tagging players. there will be many of these pages generated. 
+		two states, assigned and unassigned
+		when assigned, displays player name, tag_code and a tag button
+			when tag button pressed, the user is prompted to log in and input some info including
+			- exact location (prompted, optional) 
+			- location summery (required, optional[ask burn])
+			the page will grab the following info to store in the db
+			- time
+			- the game the user is registerd in
+			upon a tag, send a message to the tagged player. 
+		
+		when unassigned askes the player to log in and assigns them that code (brain tag) to the player.
+		
+		if theres no active game it tells the player to they cant do anything with this page
+			should check that the player doesent have a brain card already
+		
+		
+	game summery page 
+		displays a list of players, allows info to be edited.
+		
+	
+	game settings page	
+		a place to edit the email the system uses to send emails
+		a way to pause a game, preventing tags. Idealy there should be a way to spesify save time
+	
+	messageing page
+		allows text input, allows the sender to select particuler players (by name or tag_code) or to ranks 
+	
+	query input page
+		allows an admin to make SELECT queries to the database directly.
+	
+	

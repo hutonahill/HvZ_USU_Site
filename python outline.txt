@@ -1,0 +1,93 @@
++ python outline +
+
+required functions
+	registerUser()
+		peramiters
+			- user_id
+			- A_number
+			- email
+			- phone_number (optional)
+			- discord_id (optional)
+			- callsign (optional)
+			- 2FA_key (optional)
+		
+		generates and runs a SQL Insert statment into players table.
+	
+	newGame()
+		peramiters
+			- gameName
+			- startTime
+			- endTime
+			- game_email_key
+		
+		generates and runs a SQL insert statment into the games table.
+		
+	registerUserInGame()
+		peramiters
+			- user_id
+			- code_id
+			- game_id
+		
+		generates and runs a SQL insert statment into the codes, and player_game tables.
+	
+	getUserData()
+		peramiters
+			- user_id
+		
+		returns a nested list (or dict) of the relivent data assoceated with the user.
+	
+	getPlayerData()
+		returns a nested list (or dict) with all players data.
+	
+	messagePlayers()
+		peramiters
+			- list of user_ids
+			- message
+		
+		sends a message to every player in the list via there prefered method of contact.
+	
+	getTags()
+		returns a list of tag info as strings with the most recent tag at index 0.
+	
+	get2FA()
+		peramiters
+			- 2FA key
+			- code
+		
+		returns wther or not the 2FA code is valid.
+	
+	new2FA()
+		returns a new 2FA_key.
+	
+	generateQRCode()
+		peramiters
+			- url
+			- filepath
+	
+	exicuteSelect()
+		peramiters
+			- MySQL select statment
+		
+		returns a nested list table of results (the errorMsg if error).
+	
+	exicuteInsert()
+		peramiters
+			- MySQL insert statment
+		
+		returns true for no error and the errorMsg if error.
+	
+	getCodeInfo()
+		peramiters
+			- code
+		
+		reuturns true if a game is active and the code is unassigned
+		returns false if there are no active games
+		returns a stirng if an error occured
+		returns a list containing the player name and tag_code
+	
+	getPlayerName()
+		peramiters
+			- user_id
+		
+		returns the string f'{firstName} "{callsign}" {lastName}'
+		
