@@ -11,7 +11,7 @@ required functions
 			- callsign (optional)
 			- 2FA_key (optional)
 		
-		generates and runs a SQL Insert statment into players table
+		generates and runs a SQL Insert statment into players table.
 	
 	newGame()
 		peramiters
@@ -20,7 +20,7 @@ required functions
 			- endTime
 			- game_email_key
 		
-		generates and runs a SQL insert statment into the games table
+		generates and runs a SQL insert statment into the games table.
 		
 	registerUserInGame()
 		peramiters
@@ -44,6 +44,35 @@ required functions
 			- list of user_ids
 			- message
 		
-		sends a message to every player in the list via there prefered method of contact
+		sends a message to every player in the list via there prefered method of contact.
 	
+	getTags()
+		returns a list of tag info as strings with the most recent tag at index 0.
 	
+	get2FA()
+		peramiters
+			- 2FA key
+			- code
+		
+		returns wther or not the 2FA code is valid.
+	
+	new2FA()
+		returns a new 2FA_key.
+	
+	generateQRCode()
+		peramiters
+			- url
+			- filepath
+	
+	exicuteSelect()
+		peramiters
+			- MySQL select statment
+		
+		returns a nested list table of results (the errorMsg if error).
+	
+	exicuteInsert()
+		peramiters
+			- MySQL insert statment
+		
+		returns true for no error and the errorMsg if error.
+		

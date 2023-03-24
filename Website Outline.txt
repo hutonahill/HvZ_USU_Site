@@ -42,7 +42,7 @@ General pages (can be accessed by normal users from the home page)
 		- first name
 		- last name
 		- email
-		- phone number (optional, if we can set up texing alerts
+		- phone number (optional, if we can set up texing alerts https://www.twilio.com/sms/pricing/us)
 		- A-number
 		
 		Other things to do:
