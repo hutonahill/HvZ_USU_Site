@@ -75,4 +75,19 @@ required functions
 			- MySQL insert statment
 		
 		returns true for no error and the errorMsg if error.
+	
+	getCodeInfo()
+		peramiters
+			- code
+		
+		reuturns true if a game is active and the code is unassigned
+		returns false if there are no active games
+		returns a stirng if an error occured
+		returns a list containing the player name and tag_code
+	
+	getPlayerName()
+		peramiters
+			- user_id
+		
+		returns the string f'{firstName} "{callsign}" {lastName}'
 		
