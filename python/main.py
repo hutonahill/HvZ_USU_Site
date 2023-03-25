@@ -135,9 +135,9 @@ def SQL_example():
     print(result)
     
 
-@api.route('/registerUser/<user_id>/<email>/<discord_id>/<phoneNumber>/<callsign>/<fname>/<lname>')
-def registerUser(user_id:str, A_number:str, email:str, discord_id:str, 
-                phoneNumber:str, callsign:str, fname:str, lname:str):
+@api.route('/registerUser/<user_id>/<a_number>/<email>/<fname>/<callsign>/<lname>/<discord_id>/<phoneNumber>')
+@api.route('/registerUser/<user_id>/<a_number>/<email>/<fname>/<callsign>/<lname>')
+def registerUser(user_id:str, a_number:str, email:str, callsign:str, fname:str, lname:str, discord_id:str = 'null', phoneNumber:str = 'null'):
     '''
     adds a new player to a database. if there was an error return a string 
     discribing the error, if not it will return the json:
@@ -149,7 +149,7 @@ def registerUser(user_id:str, A_number:str, email:str, discord_id:str,
     "VALUES " +
     "(%s, %s, %s, %s, %s, %s, %s, %s);")
 
-    params = (user_id, A_number, callsign, fname, lname, email, discord_id, phoneNumber)
+    params = (user_id, a_number, callsign, fname, lname, email, discord_id, phoneNumber)
 
 
 
@@ -167,7 +167,6 @@ def registerUser(user_id:str, A_number:str, email:str, discord_id:str,
         
         else:
             return json.dump({"rowsEffected":result})
-
 
 
 @api.route('/newGame/<gameName>/<startTime>/<game_email_key>')
@@ -201,9 +200,9 @@ def newGame(gameName:str, startTime:str, game_email_key:str):
         else:
             return json.dump({"rowsEffected":result})
 
-@api.route('/registerUserInGame/<user_id>/<tag_code>/<gameName>')
-@api.route('/registerUserInGame/<user_id>/<tag_code>/<gameName>/<stateName>')
-def registerUserInGame(user_id:str, tag_code:str, gameName:str, stateName:str = "human"):
+@api.route('/registerUserInGame/<user_id>/<gameName>')
+@api.route('/registerUserInGame/<user_id>/<gameName>/<stateName>')
+def registerUserInGame(user_id:str,  gameName:str, stateName:str = "human"):
     '''
     Adds a new game to a database. If there was an error return a string 
     discribing the error, if not it will return the json:
@@ -350,8 +349,8 @@ def registerUserInGame(user_id:str, tag_code:str, gameName:str, stateName:str = 
         else:
             return json.dump({"rowsEffected":results})
 
-@api.route('/getUserData/<user_id>')
-def getUserData(user_id:str):
+@api.route('/getSingleUserData/<user_id>') # tested.
+def getSingleUserData(user_id:str):
     '''
     returns all user data assoceated with a user_id
 
@@ -376,19 +375,19 @@ def getUserData(user_id:str):
     filename_without_extension = os.path.splitext(filename)[0]
 
     # if results is not a list there was an error
-    if (type(results != list)):
+    if (type(results) != list):
         # if its a string, it contains an error msg
         if (type(results) == str):
             return results
         # if not, gerate our own.
         else:
-            return (f"ERROR: {filename_without_extension}.{getUserData.__name__}() " + 
+            return (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
                 f"but it returned a `{type(results)}`")
         
     # make sure there are only two rows, the data we want and a header.
     elif (len(results) != 2):
-        return (f"ERROR: {filename_without_extension}.{getUserData.__name__}() " + 
+        return (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return two rows " + 
             f"but it returned {len(results)}")
     
@@ -397,15 +396,15 @@ def getUserData(user_id:str):
         row = results[i]
 
         if (type(row) != list):
-            return (f"ERROR: {filename_without_extension}.{getUserData.__name__}() " + 
+            return (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to " + 
                 f"return a nested list, but row  {i} is a" + 
                 f"'{type(row)}'")
     
     return json.dumps({"userData":results})
 
-@api.route('/getUserData')
-def getUserData():
+@api.route('/getAllUserData') # tested.
+def getAllUserData():
     '''
     returns all user data.
 
@@ -428,22 +427,23 @@ def getUserData():
     filename_without_extension = os.path.splitext(filename)[0]
 
     # if results is not a list there was an error
-    if (type(results != list)):
+    resultsType = type(results)
+    if (type(results)!= list):
         # if its a string, it contains an error msg
         if (type(results) == str):
             return results
         # if not, gerate our own.
         else:
-            return (f"ERROR: {filename_without_extension}.{getUserData.__name__}() " + 
+            return (f"ERROR: {filename_without_extension}.{getAllUserData.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
-                f"but it returned a `{type(results)}`")
+                f"but it returned a `{str(type(results))}`")
     
     # make sure every row is a list
     for i in range(len(results)):
         row = results[i]
 
         if (type(row) != list):
-            return (f"ERROR: {filename_without_extension}.{getUserData.__name__}() " + 
+            return (f"ERROR: {filename_without_extension}.{getAllUserData.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to " + 
                 f"return a nested list, but row  {i} is a" + 
                 f"'{type(row)}'")
@@ -506,7 +506,7 @@ def getTags():
     filename_without_extension = os.path.splitext(filename)[0]
 
     # if results is not a list there was an error
-    if (type(results != list)):
+    if (type(results) != list):
         # if its a string, it contains an error msg
         if (type(results) == str):
             return results
@@ -551,7 +551,7 @@ def check2FAKey(user_id, code):
     filename_without_extension = os.path.splitext(filename)[0]
 
     # if results is not a list there was an error
-    if (type(results != list)):
+    if (type(results) != list):
         # if its a string, it contains an error msg
         if (type(results) == str):
             return results
@@ -614,7 +614,7 @@ def generateQRCode(url):
     img.save(filepath)
     return filepath
 
-@api.route('/getTagPageInfo/<user_id>')
+@api.route('/getTagPageInfo/<user_id>') 
 def getTagPageInfo(user_id:str):
     '''
     check if a tag page exists for a player and returns all the data asoceated 
@@ -716,13 +716,7 @@ def getTagPageInfo(user_id:str):
 
     return json.dumps({"results": results})
 
-        
-
-
-
-    
-
-@api.route('/getPlayer_id/<user_id>') 
+@api.route('/getPlayer_id/<user_id>') # Tested 
 def getPlayer_id(user_id:str):
     '''
     returns a player_id for a given user_id.
@@ -747,7 +741,7 @@ def getPlayer_id(user_id:str):
     filename_without_extension = os.path.splitext(filename)[0]
 
     # if results is not a list there was an error
-    if (type(results != list)):
+    if (type(results) != list):
         # if its a string, it contains an error msg
         if (type(results) == str):
             return results
@@ -831,11 +825,11 @@ def checkSingleOutputSelect(results):
     else:
         return True
 
-if __name__ == "__main__":
-    SQL_example()
+# if __name__ == "__main__":
+#     print(getAllUserData())
 
 # THIS LINE MUST BE UNCOMMENTED IN ORDER FOR THE PROGRAM TO WORK 
 # AS AN API!
-# if __name__ == '__main__':
-#     api.run()
-#     connection.close()
+if __name__ == '__main__':
+    api.run()
+    connection.close()

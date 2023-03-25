@@ -84,7 +84,7 @@ DROP TABLE IF EXISTS `hvz`.`players` ;
 
 -- Create the `players` table
 CREATE TABLE IF NOT EXISTS `hvz`.`players` (
-  `player_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `player_id` INT(7) UNSIGNED ZEROFILL NOT NULL AUTO_INCREMENT,
   `user_id` VARCHAR(45) NOT NULL,
   
   -- Define the `a_number` column, which should start with an 'a' (upper or lower) and followed by 8 digits
