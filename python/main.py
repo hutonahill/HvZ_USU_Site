@@ -448,21 +448,30 @@ def getAllUserData():
             return results
         # if not, gerate our own.
         else:
-            return (f"ERROR: {filename_without_extension}.{getAllUserData.__name__}() " + 
+            errorMsg = (f"ERROR: {filename_without_extension}.{getAllUserData.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
                 f"but it returned a `{str(type(results))}`")
+            print(errorMsg)
+            return errorMsg
     
     # make sure every row is a list
     for i in range(len(results)):
         row = results[i]
 
         if (type(row) != list):
-            return (f"ERROR: {filename_without_extension}.{getAllUserData.__name__}() " + 
+            errorMsg = (f"ERROR: {filename_without_extension}.{getAllUserData.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to " + 
                 f"return a nested list, but row  {i} is a" + 
                 f"'{type(row)}'")
+            print(errorMsg)
+            return errorMsg
     
-    return json.dumps({"userData":results})
+
+
+    response = make_response({"userData":results})
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @api.route('/getTags')
 def getTags():
