@@ -204,6 +204,9 @@ def newGame(gameName:str, startTime:str, game_email_key:str):
         else:
             return json.dump({"rowsEffected":result})
 
+
+
+
 # this wont work if the user has multiple states. i would need to update the query 
 @api.route('/registerUserInGame/<user_id>/<gameName>')
 @api.route('/registerUserInGame/<user_id>/<gameName>/<stateName>')
@@ -442,6 +445,11 @@ def getSingleUserData(user_id:str):
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+
+
+
+
+
 
 @api.route('/getAllUserData') # tested.
 def getAllUserData():
