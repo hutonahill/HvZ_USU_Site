@@ -1,0 +1,11 @@
+.user-background {
+    position: fixed;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: scroll; 
+    background-color: #0f2439;
+
+    margin-top: 64px;
+}
