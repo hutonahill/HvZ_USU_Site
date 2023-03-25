@@ -137,7 +137,7 @@ def SQL_example():
 
 @api.route('/registerUser/<user_id>/<a_number>/<email>/<fname>/<callsign>/<lname>/<discord_id>/<phoneNumber>')
 @api.route('/registerUser/<user_id>/<a_number>/<email>/<fname>/<callsign>/<lname>')
-def registerUser(user_id:str, a_number:str, email:str, callsign:str, fname:str, lname:str, discord_id:str = 'null', phoneNumber:str = 'null'):
+def registerUser(user_id:str, a_number:str, email:str, callsign:str, fname:str, lname:str, discord_id:str = None, phoneNumber:str = None):
     '''
     adds a new player to a database. if there was an error return a string 
     discribing the error, if not it will return the json:
@@ -148,6 +148,9 @@ def registerUser(user_id:str, a_number:str, email:str, callsign:str, fname:str, 
     "(user_id, a_number, callsign, fname, lname email, discord_id, phone_number) " +
     "VALUES " +
     "(%s, %s, %s, %s, %s, %s, %s, %s);")
+
+    discord_id = 'NULL' if discord_id is None else discord_id
+    phoneNumber = 'NULL' if phoneNumber is None else phoneNumber
 
     params = (user_id, a_number, callsign, fname, lname, email, discord_id, phoneNumber)
 
@@ -769,6 +772,58 @@ def getPlayer_id(user_id:str):
     
     return json.dumps({"player_id":results[1][0]})
 
+@api.route('/getPlayerName/<user_id>')
+def getPlayerName(user_id:str):
+    '''
+    Returns a playerName for a given user_id. includes callsign if posible.
+
+    If there was an error, returns the error as a string
+
+    If no error, returns a json object in the below format
+
+    {"playerName":results}
+    '''
+    query = (f"SELECT IF(callsign IS NULL, CONCAT(fname, ' ',lname), CONCAT(fname, ' ', callsign, ' ', lname )) AS playerName FROM players WHERE user_id = %s;")
+
+    perams = (user_id,)
+    
+    results = SQL_SELECT (query, perams)
+    
+
+    # Get the filename with extension
+    filename = os.path.basename(__file__)
+
+    # Extract the filename without extension (used in returning errors)
+    filename_without_extension = os.path.splitext(filename)[0]
+
+    # if results is not a list there was an error
+    if (type(results) != list):
+        # if its a string, it contains an error msg
+        if (type(results) == str):
+            return results
+        # if not, gerate our own.
+        else:
+            return (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
+                f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
+                f"but it returned a `{type(results)}`")
+        
+    # make sure there are only two rows, the data we want and a header.
+    elif (len(results) != 2):
+        return (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
+            f"expected {filename_without_extension}.SQL_SELECT() to return two rows " + 
+            f"but it returned {len(results)}")
+    
+    # make sure every row is a list
+    for i in range(len(results)):
+        row = results[i]
+
+        if (type(row) != list):
+            return (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
+                f"expected {filename_without_extension}.SQL_SELECT() to " + 
+                f"return a nested list, but row  {i} is a" + 
+                f"'{type(row)}'")
+    
+    return json.dumps({"playerName":results[1][0]})
 
 def is_int(s):
     try:
