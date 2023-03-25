@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from 'react-bootstrap';
 import { Navigate, useNavigate } from 'react-router-dom';
 import './all-players.css'
-import data from './mockData.json'
 
 export default function AllPlayers() {
+    const [data, setData] = useState([])
     const [searchInput, setSearchInput] = useState("");
     const [inputText, setInputText] = useState("");
     const [filterRole, setFilterRole] = useState("");
@@ -13,8 +13,19 @@ export default function AllPlayers() {
     let navigate = useNavigate()
 
     function handleSubmit(item) {
-        navigate(`/tag/${item.player_id}`)
+        navigate(`/tag/${item[1]}`)
     }
+
+    useEffect(() => {
+      async function apiCall() {
+        fetch(`http://localhost:5000/getAllUserData`)
+      .then((response) => response.json())
+      .then((res) => setData(res.userData[1]))
+      .catch(err => console.log(err));
+      }
+      console.log()
+      apiCall()
+    }, [])
 
     let inputHandler = (e) => {
       //convert input text to lower case
@@ -26,7 +37,7 @@ export default function AllPlayers() {
     //create a new array by filtering the original array
     let filteredData = data.filter((el) => {
         if (inputText !== "") {
-            return el.name.toLowerCase().includes(inputText)
+            return el[4].toLowerCase().includes(inputText)
         } else {
             return el
         }
@@ -38,10 +49,10 @@ export default function AllPlayers() {
             <div className="player-list">
                 {filteredData.map((item) => (
                     <div className="player-wrapper">
-                        <h2 className="player-text">{item.name}</h2>
-                        <h2>{item.student_id}</h2>
-                        <h2>{item.player_id}</h2>
-                        <h2>{item.status}</h2>
+                        <h2 className="player-text">{item[4] + ' ' + item[5]}</h2>
+                        <h2>{item[2]}</h2>
+                        <h2>{item[0]}</h2>
+                        <h2>{item[11]}</h2>
                         <Button className='buttonStyle w-100' onClick={() => handleSubmit(item)}>Tag Player</Button>
                     </div>
                 ))}

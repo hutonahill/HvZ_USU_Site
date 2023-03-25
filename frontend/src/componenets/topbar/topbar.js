@@ -5,7 +5,7 @@ import './topbar.css'
 
 export default function TopBar(props) { 
     let { currentUser } = useAuth()
-    const [status, setStatus] = useState('guest')
+    const [status, setStatus] = useState('admin')
   
     if(status == 'admin') {
       return(
