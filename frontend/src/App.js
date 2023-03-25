@@ -9,6 +9,8 @@ import SignUp from './pages/sign-up/sign-up';
 import ForgotPassword from './pages/forgot-password/forgot-password';
 import User from './pages/user/user';
 import AllPlayers from './pages/all-players/all-players';
+import GameSettings from './pages/game-settings/game-settings';
+import Tag from './pages/tag/tag';
 
 function App() {
 
@@ -21,8 +23,10 @@ function App() {
             <Route path='/' element={<Home/>} />
             <Route path='/all-players' element={<AllPlayers/>}/>
             <Route path='/forgot-password' element={<ForgotPassword/>}/>
+            <Route path='/game-settings' element={<GameSettings/>}/>
             <Route path='/sign-in' element={<SignIn/>}/>
             <Route path='/sign-up' element={<SignUp/>}/>
+            <Route path='/tag/*' element={<Tag/>}/>
             <Route path='/user' element={<User/>}/>
           </Routes>
         </AuthProvider>

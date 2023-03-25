@@ -9,6 +9,9 @@ import './sign-up.css'
 export default function SignUp() {
   const emailRef = useRef()
   const passwordRef = useRef()
+  const firstNameRef = useRef()
+  const lastNameRef = useRef()
+  const aggieIdRef = useRef()
   const { signup } = useAuth()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -44,13 +47,23 @@ export default function SignUp() {
               {error && <Alert variant="danger">{error}</Alert>}
               
               <Form onSubmit={handleSubmit}>
-                <Form.Group id="email" className="mt-4">
+                <Form.Group id="email" className="mt-4 text-white">
                   <Form.Label>Email</Form.Label>
                   <Form.Control type="email" ref={emailRef} required />
                 </Form.Group>
-                <Form.Group id="password" className="mt-1">
+                <Form.Group id="password" className="mt-1 text-white">
                   <Form.Label>Password</Form.Label>
                   <Form.Control type="password" ref={passwordRef} required />
+                </Form.Group>
+                <Form.Group id="Name" className="mt-1 text-white">
+                  <Form.Label>First Name</Form.Label>
+                  <Form.Control type="input" ref={firstNameRef} required />
+                  <Form.Label>Last Name</Form.Label>
+                  <Form.Control type="input" ref={lastNameRef} required />
+                </Form.Group>
+                <Form.Group id="Aggie_ID" className="mt-1 text-white">
+                  <Form.Label>A ID</Form.Label>
+                  <Form.Control type="input" ref={aggieIdRef} required />
                 </Form.Group>
                 <Button disabled={loading} className='buttonStyle w-100 mt-4' type="submit">Signup</Button>
               </Form>

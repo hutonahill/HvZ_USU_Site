@@ -9,3 +9,11 @@
 
     margin-top: 64px;
 }
+
+h1 {
+    color: #0088cc;
+}
+
+h2, h3 {
+    color: white;
+}

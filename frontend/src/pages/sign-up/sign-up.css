@@ -1,3 +1,7 @@
 #email {
     margin-bottom: 1rem !important;
 }
+
+.button {
+    margin-left: -100% !important;
+}
