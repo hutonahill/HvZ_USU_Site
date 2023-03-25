@@ -1,7 +1,7 @@
 + python outline +
 
 required functions
-	registerUser()
+	registerUser() done
 		peramiters
 			- user_id
 			- A_number
@@ -13,7 +13,7 @@ required functions
 		
 		generates and runs a SQL Insert statment into players table.
 	
-	newGame()
+	newGame() done
 		peramiters
 			- gameName
 			- startTime
@@ -22,7 +22,7 @@ required functions
 		
 		generates and runs a SQL insert statment into the games table.
 		
-	registerUserInGame()
+	registerUserInGame() done
 		peramiters
 			- user_id
 			- code_id
@@ -30,13 +30,14 @@ required functions
 		
 		generates and runs a SQL insert statment into the codes, and player_game tables.
 	
-	getUserData()
+	getUserData() done
 		peramiters
 			- user_id
 		
 		returns a nested list (or dict) of the relivent data assoceated with the user.
 	
-	getPlayerData()
+	getPlayerData() done
+		# ive made this an override of getUserData, just dont include a peramiter.
 		returns a nested list (or dict) with all players data.
 	
 	messagePlayers()
@@ -46,17 +47,17 @@ required functions
 		
 		sends a message to every player in the list via there prefered method of contact.
 	
-	getTags()
+	getTags() done
 		returns a list of tag info as strings with the most recent tag at index 0.
 	
-	get2FA()
+	get2FA() done
 		peramiters
 			- 2FA key
 			- code
 		
 		returns wther or not the 2FA code is valid.
 	
-	new2FA()
+	new2FA() done
 		returns a new 2FA_key.
 	
 	generateQRCode()

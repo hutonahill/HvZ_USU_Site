@@ -15,7 +15,6 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 CREATE SCHEMA IF NOT EXISTS `hvz` DEFAULT CHARACTER SET utf8 ;
 USE `hvz` ;
 
-
 -- -----------------------------------------------------
 -- Table `hvz`.`players`
 -- -----------------------------------------------------
@@ -71,11 +70,6 @@ CREATE TABLE IF NOT EXISTS `hvz`.`games` (
   `game_start_time` VARCHAR(45) NULL,
   # wther or not the game is active, can people sign up for the game, register or not
   `is_game_active` ENUM("y", "n") NOT NULL DEFAULT "n",
-  # make sure only one game is active at a time
-  CONSTRAINT chk_is_game_active CHECK (
-    (`is_game_active` = 'y' AND (SELECT COUNT(*) FROM games WHERE is_game_active = 'y') = 1)
-    OR `is_game_active` = 'n'
-   ),
    # are people safe from being tagged? when set to y you cannot tag people
   `is_safe_active` ENUM("y", "n") NOT NULL DEFAULT "n",
   # the gmail key 
@@ -97,16 +91,6 @@ CREATE TABLE IF NOT EXISTS `hvz`.`equipment` (
 ENGINE = InnoDB;
 
 
--- -----------------------------------------------------
--- Table `hvz`.`tag_codes`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `hvz`.`tag_codes` ;
-
-CREATE TABLE IF NOT EXISTS `hvz`.`tag_codes` (
-  `tag_code_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `tag_code` VARCHAR(45) UNIQUE NOT NULL,
-  PRIMARY KEY (`tag_code_id`))
-ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `hvz`.`roles`
@@ -130,11 +114,11 @@ CREATE TABLE IF NOT EXISTS `hvz`.`roles`(
 DROP TABLE IF EXISTS `hvz`.`states` ;
 
 CREATE TABLE IF NOT EXISTS `hvz`.`states` (
-  `states_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `state_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `state` VARCHAR(45) NOT NULL,
   # a discription of the role
   `state_discription`  VARCHAR(75) NULL,
-  PRIMARY KEY (`states_id`))
+  PRIMARY KEY (`state_id`))
 ENGINE = InnoDB;
 
 
@@ -207,17 +191,15 @@ CREATE TABLE IF NOT EXISTS `hvz`.`players_games` (
   `player_id` INT UNSIGNED NOT NULL,
   # the game they are registering for.
   `game_id` INT UNSIGNED NOT NULL,
-  # the tag code they have for this game
-  `tag_code_id` INT UNSIGNED NOT NULL,
   # the state they currently have
-  `states_id` INT UNSIGNED NOT NULL,
-  # ive removed states_id and tage_code_id from the primary key declaration
+  `state_id` INT UNSIGNED NOT NULL,
+  # ive removed state_id and tage_code_id from the primary key declaration
   # as i only want the combo of player_id and game_id to be unique
   PRIMARY KEY (`player_id`, `game_id`),
   INDEX `fk_players_games_games1_idx` (`game_id` ASC) VISIBLE,
   INDEX `fk_players_games_players1_idx` (`player_id` ASC) VISIBLE,
-  INDEX `fk_players_games_tag_codes1_idx` (`tag_code_id` ASC) VISIBLE,
-  INDEX `fk_players_games_states1_idx` (`states_id` ASC) VISIBLE,
+
+  INDEX `fk_players_games_states1_idx` (`state_id` ASC) VISIBLE,
   CONSTRAINT `fk_players_games_players1`
     FOREIGN KEY (`player_id`)
     REFERENCES `hvz`.`players` (`player_id`)
@@ -228,14 +210,9 @@ CREATE TABLE IF NOT EXISTS `hvz`.`players_games` (
     REFERENCES `hvz`.`games` (`game_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_players_games_tag_codes1`
-    FOREIGN KEY (`tag_code_id`)
-    REFERENCES `hvz`.`tag_codes` (`tag_code_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
   CONSTRAINT `fk_players_games_states1`
-    FOREIGN KEY (`states_id`)
-    REFERENCES `hvz`.`states` (`states_id`)
+    FOREIGN KEY (`state_id`)
+    REFERENCES `hvz`.`states` (`state_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -249,19 +226,8 @@ DROP TABLE IF EXISTS `hvz`.`roles_lore` ;
 CREATE TABLE IF NOT EXISTS `hvz`.`roles_lore` (
   `role_id` INT UNSIGNED NOT NULL,
   `lore_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`role_id`, `lore_id`),
-  INDEX `fk_tag_codes_lore_lore1_idx` (`lore_id` ASC) VISIBLE,
-  INDEX `fk_tag_codes_lore_roles1_idx` (`role_id` ASC) VISIBLE,
-  CONSTRAINT `fk_roles_lore_roles1`
-    FOREIGN KEY (`role_id`)
-    REFERENCES `hvz`.`roles` (`role_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_roles_lore_lore1`
-    FOREIGN KEY (`lore_id`)
-    REFERENCES `hvz`.`lore` (`lore_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  PRIMARY KEY (`role_id`, `lore_id`)
+)
 ENGINE = InnoDB;
 
 
@@ -271,21 +237,10 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `hvz`.`states_lore` ;
 
 CREATE TABLE IF NOT EXISTS `hvz`.`states_lore` (
-  `states_id` INT UNSIGNED NOT NULL,
+  `state_id` INT UNSIGNED NOT NULL,
   `lore_id` INT NOT NULL,
-  PRIMARY KEY (`states_id`, `lore_id`),
-  INDEX `fk_states_lore_lore1_idx` (`lore_id` ASC) VISIBLE,
-  INDEX `fk_states_lore_states1_idx` (`states_id` ASC) VISIBLE,
-  CONSTRAINT `fk_states_lore_states1`
-    FOREIGN KEY (`states_id`)
-    REFERENCES `hvz`.`states` (`states_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_states_lore_lore1`
-    FOREIGN KEY (`lore_id`)
-    REFERENCES `hvz`.`lore` (`lore_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  PRIMARY KEY (`state_id`, `lore_id`)
+)
 ENGINE = InnoDB;
 
 
@@ -297,19 +252,8 @@ DROP TABLE IF EXISTS `hvz`.`players_lore` ;
 CREATE TABLE IF NOT EXISTS `hvz`.`players_lore` (
   `player_id` INT NOT NULL,
   `lore_id` INT NOT NULL,
-  PRIMARY KEY (`player_id`, `lore_id`),
-  INDEX `fk_players_lore_lore1_idx` (`lore_id` ASC) VISIBLE,
-  INDEX `fk_players_lore_players1_idx` (`player_id` ASC) VISIBLE,
-  CONSTRAINT `fk_players_lore_players1`
-    FOREIGN KEY (`player_id`)
-    REFERENCES `hvz`.`players` (`player_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_players_lore_lore1`
-    FOREIGN KEY (`lore_id`)
-    REFERENCES `hvz`.`lore` (`lore_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  PRIMARY KEY (`player_id`, `lore_id`)
+)
 ENGINE = InnoDB;
 
 
@@ -321,19 +265,8 @@ DROP TABLE IF EXISTS `hvz`.`equipment_players` ;
 CREATE TABLE IF NOT EXISTS `hvz`.`equipment_players` (
   `equipment_id` INT UNSIGNED NOT NULL,
   `player_id`  INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`equipment_id`, `player_id`),
-  INDEX `fk_equipment_players_players1_idx` (`player_id` ASC) VISIBLE,
-  INDEX `fk_equipment_players_equipment1_idx` (`equipment_id` ASC) VISIBLE,
-  CONSTRAINT `fk_equipment_players_equipment1`
-    FOREIGN KEY (`equipment_id`)
-    REFERENCES `hvz`.`equipment` (`equipment_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_equipment_players_players1`
-    FOREIGN KEY (`player_id`)
-    REFERENCES `hvz`.`players` (`player_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  PRIMARY KEY (`equipment_id`, `player_id`)
+  )
 ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
