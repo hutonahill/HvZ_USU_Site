@@ -216,6 +216,10 @@ def registerUserInGame(user_id:str,  gameName:str, stateName:str = "human"):
     # start by geting the player_id from the user_id
     query = (f"SELECT player_id FROM players WHERE user_id = %s;")
 
+    # the peramiters. 
+    # corisponds to %s in the query in order of appearance
+    # i think this helps sidestep SQL injection attacks
+    # alwasy use this mehtod for any kind of userInput data
     perams = (user_id,)
     
 
@@ -251,6 +255,10 @@ def registerUserInGame(user_id:str,  gameName:str, stateName:str = "human"):
     # now get the game_id from the gameName
     query = (f"SELECT game_id FROM games WHERE game_name = %s;")
 
+    # the peramiters. 
+    # corisponds to %s in the query in order of appearance
+    # i think this helps sidestep SQL injection attacks
+    # alwasy use this mehtod for any kind of userInput data
     perams = (gameName,)
 
     results = SQL_SELECT (query, perams)
@@ -280,6 +288,10 @@ def registerUserInGame(user_id:str,  gameName:str, stateName:str = "human"):
 
     query = (f"SELECT tag_code_id FROM codes WHERE tag_code = %s;")
 
+    # the peramiters. 
+    # corisponds to %s in the query in order of appearance
+    # i think this helps sidestep SQL injection attacks
+    # alwasy use this mehtod for any kind of userInput data
     perams = (gameName,)
 
     results = SQL_SELECT(query, perams)
@@ -307,6 +319,10 @@ def registerUserInGame(user_id:str,  gameName:str, stateName:str = "human"):
     # ok, last item we need to look up, the state_id, usualy based off `zombie``.
     query = (f"SELECT state_id FROM states WHERE state = %s;")
 
+    # the peramiters. 
+    # corisponds to %s in the query in order of appearance
+    # i think this helps sidestep SQL injection attacks
+    # alwasy use this mehtod for any kind of userInput data
     perams = (stateName,)
 
     results = SQL_SELECT(query, perams)
@@ -364,9 +380,17 @@ def getSingleUserData(user_id:str):
     {"userData":nestedList}
     '''
     
+    # the query to be sent to the SQL database
+    query = (f"SELECT player_id, user_id, a_number, callsign, fname, lname, email, state " + 
+             "FROM players " + 
+             "LEFT JOIN games_players ON players.player_id = games_players.player_id" +
+             "LEFT JOIN states ON games_players.state_id = states.state_id" +
+            "WHERE user_id = %s;")
 
-    query = (f"SELECT * FROM players WHERE user_id = %s;")
-
+    # the peramiters. 
+    # corisponds to %s in the query in order of appearance
+    # i think this helps sidestep SQL injection attacks
+    # alwasy use this mehtod for any kind of userInput data
     perams = (user_id,)
     
     results = SQL_SELECT (query, perams)
@@ -427,10 +451,13 @@ def getAllUserData():
 
     {"userData":nestedList}
     '''
-    
-    query = (f"SELECT * FROM players;")
+    # the query to be sent to the SQL database
+    query = (f"SELECT player_id, user_id, a_number, callsign, fname, lname, email, state " + 
+             "FROM players " + 
+             "LEFT JOIN games_players ON players.player_id = games_players.player_id" +
+             "LEFT JOIN states ON games_players.state_id = states.state_id;")
 
-    
+    # send the query
     results = SQL_SELECT (query)
     
 
@@ -517,6 +544,10 @@ def getTags():
 
     query = (f"SELECT * FROM tag_registry WHERE game_id = %s;")
 
+    # the peramiters. 
+    # corisponds to %s in the query in order of appearance
+    # i think this helps sidestep SQL injection attacks
+    # alwasy use this mehtod for any kind of userInput data
     perams = (game_id, )
     
     results = SQL_SELECT (query)
@@ -562,6 +593,10 @@ def check2FAKey(user_id, code):
     
     query = (f"SELECT twoFA_key FROM players WHERE user_id = %s;")
 
+    # the peramiters. 
+    # corisponds to %s in the query in order of appearance
+    # i think this helps sidestep SQL injection attacks
+    # alwasy use this mehtod for any kind of userInput data
     perams = (user_id,)
     
     results = SQL_SELECT (query, perams)
@@ -684,6 +719,10 @@ def getTagPageInfo(user_id:str):
     # check if there is a active game, if there is, get the game_id.
     query = (f"SELECT state_id FROM players_games WHERE player_id = %s AND game_id = %s;")
 
+    # the peramiters. 
+    # corisponds to %s in the query in order of appearance
+    # i think this helps sidestep SQL injection attacks
+    # alwasy use this mehtod for any kind of userInput data
     perams = (player_id, game_id)
 
     results = SQL_SELECT (query, perams)
@@ -716,6 +755,10 @@ def getTagPageInfo(user_id:str):
              "LEFT JOIN states ON players_games.state_id = states.state_id "+
              "WHERE players.player_id = %s AND players_games.game_id = %s;")
 
+    # the peramiters. 
+    # corisponds to %s in the query in order of appearance
+    # i think this helps sidestep SQL injection attacks
+    # alwasy use this mehtod for any kind of userInput data
     perams = (player_id, game_id)
 
     results = SQL_SELECT (query, perams)
@@ -752,6 +795,10 @@ def getPlayer_id(user_id:str):
     '''
     query = (f"SELECT player_id FROM players WHERE user_id = %s;")
 
+    # the peramiters. 
+    # corisponds to %s in the query in order of appearance
+    # i think this helps sidestep SQL injection attacks
+    # alwasy use this mehtod for any kind of userInput data
     perams = (user_id,)
     
     results = SQL_SELECT (query, perams)
@@ -805,6 +852,10 @@ def getPlayerName(user_id:str):
     '''
     query = (f"SELECT IF(callsign IS NULL, CONCAT(fname, ' ',lname), CONCAT(fname, ' ', callsign, ' ', lname )) AS playerName FROM players WHERE user_id = %s;")
 
+    # the peramiters. 
+    # corisponds to %s in the query in order of appearance
+    # i think this helps sidestep SQL injection attacks
+    # alwasy use this mehtod for any kind of userInput data
     perams = (user_id,)
     
     results = SQL_SELECT (query, perams)
