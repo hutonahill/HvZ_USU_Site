@@ -11,7 +11,14 @@ export default function User() {
     const [status, setStatus] = useState('Zombie')
 
     useEffect(() => {
-      setData(getUser(currentUser.uid))
+      async function apiCall() {
+        fetch(`http://localhost:5000/getSingleUserData/${currentUser.uid}`)
+      .then((response) => response.json())
+      .then((res) => setData(res.userData[1]))
+      .catch(err => console.log(err));
+      }
+      console.log()
+      apiCall()
     }, [])
 
     async function handleSubmit(e) {
@@ -28,7 +35,7 @@ export default function User() {
   return (
     <div className='user-background'>
         <h1>You</h1>
-        <h2>First Name</h2>
+        <h2>{data[4] + " " + data[5]}</h2>
         <h3>Player ID <Link to={'/tag/'}>Got Tagged?</Link></h3>
         <h3>{status}</h3>
         <Button className='buttonStyle w-100' onClick={handleSubmit}>Logout</Button>

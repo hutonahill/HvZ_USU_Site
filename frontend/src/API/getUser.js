@@ -1,14 +1,22 @@
 import axios from "axios";
 import { useState } from "react";
 
-export function getUser(uid) {
+export async function getUser(uid) {
     let result = [];
-    axios.get(`http://localhost:5000/getSingleUserData/${uid}`).then((res) => JSON.parse(res)).then((res) => result = res).catch((err) => console.log(err))
-    fetch(`http://localhost:5000/getSingleUserData/${uid}`)
-  .then((response) => response.json())
+    fetch(`http://localhost:5000/getSingleUserData/${uid}`, {
+        method: "GET", // or 'PUT'
+        mode: "cors", // no-cors, *cors, same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        headers: {
+        //   "Content-Type": "",
+          // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    })
+  .then((response) => {response.json()})
   .then((data) => 
-        {console.log(data)
-        result = data.userData[1]});
+        {result = data.userData})
+    .catch(err => console.log(err));
 
     return result;
 }

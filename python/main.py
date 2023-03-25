@@ -1,10 +1,12 @@
 import mysql.connector
 import json
 from flask import Flask, json
+from flask import make_response
 import os
 import inspect
 
 api = Flask(__name__)
+
 
 connection = mysql.connector.connect(
     host="localhost",
@@ -47,7 +49,6 @@ def SQL_SELECT( query:str, params:tuple=None):
     except mysql.connector.Error as err:
         # Return the error message as a string
         return f"Error executing query: {err}"
-
 
 def SQL_INSERT(query:str, params:tuple=None):
     """
@@ -381,30 +382,40 @@ def getSingleUserData(user_id:str):
     if (type(results) != list):
         # if its a string, it contains an error msg
         if (type(results) == str):
+            print(results)
             return results
         # if not, gerate our own.
         else:
-            return (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
+            errorMsg = (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
                 f"but it returned a `{type(results)}`")
+            print(errorMsg)
+            return errorMsg
         
     # make sure there are only two rows, the data we want and a header.
     elif (len(results) != 2):
-        return (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
+        errorMsg = (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return two rows " + 
             f"but it returned {len(results)}")
+        print(errorMsg)
+        return errorMsg
     
     # make sure every row is a list
     for i in range(len(results)):
         row = results[i]
 
         if (type(row) != list):
-            return (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
+            errorMsg = (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to " + 
                 f"return a nested list, but row  {i} is a" + 
                 f"'{type(row)}'")
+            print(errorMsg)
+            return errorMsg
     
-    return json.dumps({"userData":results})
+    response = make_response({"userData":results})
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @api.route('/getAllUserData') # tested.
 def getAllUserData():
@@ -887,4 +898,3 @@ def checkSingleOutputSelect(results):
 # AS AN API!
 if __name__ == '__main__':
     api.run()
-    connection.close()
