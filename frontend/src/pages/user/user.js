@@ -1,12 +1,18 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from 'react-bootstrap'
 import { Link, Navigate } from 'react-router-dom'
+import { getUser } from '../../API/getUser'
 import { useAuth } from '../../contexts/AuthContext'
 import './user.css'
 
 export default function User() {
-    let { logout } = useAuth()
+    let { logout, currentUser } = useAuth()
+    const [data, setData] = useState([])
     const [status, setStatus] = useState('Zombie')
+
+    useEffect(() => {
+      setData(getUser(currentUser.uid))
+    }, [])
 
     async function handleSubmit(e) {
     e.preventDefault()
