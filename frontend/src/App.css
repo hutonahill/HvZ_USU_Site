@@ -1,5 +1,13 @@
+@font-face {
+  font-family: 'ShinGo';
+  src: local('ShinGo'), url(./fonts/ShinGo/AOTFShinGoProRegular.otf) format('opentype');
+  /* other formats include: 'woff2', 'truetype, 'opentype',
+                            'embedded-opentype', and 'svg' */
+}
+
 .App {
   text-align: center;
+  font-family: 'ShinGo';
 }
 
 .App-logo {
