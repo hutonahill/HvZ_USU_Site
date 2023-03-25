@@ -614,7 +614,7 @@ def generateQRCode(url):
     img.save(filepath)
     return filepath
 
-
+@api.route('/getTagPageInfo/<user_id>')
 def getTagPageInfo(user_id:str):
     '''
     check if a tag page exists for a player and returns all the data asoceated 
