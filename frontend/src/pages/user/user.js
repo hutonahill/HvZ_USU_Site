@@ -37,7 +37,7 @@ export default function User() {
         <h1>You</h1>
         <h2>{data[4] + " " + data[5]}</h2>
         <h3>{data[0]}<Link to={`/tag/${currentUser.uid}`}>Got Tagged?</Link></h3>
-        <h3>{data[11]}</h3>
+        <h3>{data[7]}</h3>
         <Button className='buttonStyle w-100' onClick={handleSubmit}>Logout</Button>
     </div>
   )

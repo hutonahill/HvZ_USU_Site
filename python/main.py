@@ -383,10 +383,10 @@ def getSingleUserData(user_id:str):
     '''
     
     # the query to be sent to the SQL database
-    query = (f"SELECT player_id, user_id, a_number, callsign, fname, lname, email, state " + 
+    query = (f"SELECT players.player_id, user_id, a_number, callsign, fname, lname, email, state " + 
              "FROM players " + 
-             "LEFT JOIN games_players ON players.player_id = games_players.player_id" +
-             "LEFT JOIN states ON games_players.state_id = states.state_id" +
+             "LEFT JOIN players_games ON players.player_id = players_games.player_id " +
+             "LEFT JOIN states ON players_games.state_id = states.state_id " +
             "WHERE user_id = %s;")
 
     # the peramiters. 
@@ -454,10 +454,10 @@ def getAllUserData():
     {"userData":nestedList}
     '''
     # the query to be sent to the SQL database
-    query = (f"SELECT player_id, user_id, a_number, callsign, fname, lname, email, state " + 
+    query = (f"SELECT players.player_id, user_id, a_number, callsign, fname, lname, email, state " + 
              "FROM players " + 
-             "LEFT JOIN games_players ON players.player_id = games_players.player_id" +
-             "LEFT JOIN states ON games_players.state_id = states.state_id;")
+             "LEFT JOIN players_games ON players.player_id = players_games.player_id " +
+             "LEFT JOIN states ON players_games.state_id = states.state_id;")
 
     # send the query
     results = SQL_SELECT (query)
@@ -520,28 +520,7 @@ def getTags():
     filename_without_extension = os.path.splitext(filename)[0]
 
 
-    # first we get the active game
-    # now get the game_id from the gameName
-    query = (f"SELECT game_id FROM games WHERE is_game_active = y;")
-
-    results = SQL_SELECT (query)
-
-    # run a battery of tests on the result to make sure its in the propper format
-    isValid = checkSingleOutputSelect(results)
-    
-    # if it returns true there were no errors, if not it returned an errorMsg,
-    # return it to the user.
-    if (isValid != True):
-        return isValid
-    # make sure that row is holding an int
-    elif (is_int(results[1][0])):
-        return (f"ERROR: {filename_without_extension}.{getTags.__name__}() " + 
-            f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
-            f"(int) but it did not")
-
-    # if there were no errors, set the game_id as the result
-    else:
-        game_id = int(results[1][0])
+    game_id = getActiveGameID()
     
 
     query = (f"SELECT * FROM tag_registry WHERE game_id = %s;")
@@ -583,6 +562,52 @@ def getTags():
                 f"'{type(row)}'")
     
     return json.dumps({"tags":results})
+
+@api.route('/getActiveGameID')
+def getActiveGameID():
+    '''
+    returns the game_id of the active game.
+
+    if theres an error it returns the errorMsg as a stirng
+    
+    if theres no error it returns a json object in the below format:
+    
+    {"active_game_id":resutlts}
+    '''
+    # Get the filename with extension
+    filename = os.path.basename(__file__)
+
+    # Extract the filename without extension (used in returning errors)
+    filename_without_extension = os.path.splitext(filename)[0]
+
+    # first we get the active game
+    # now get the game_id from the gameName
+    query = (f"SELECT game_id FROM games WHERE is_game_active = y;")
+
+    results = SQL_SELECT (query)
+
+    # run a battery of tests on the result to make sure its in the propper format
+    isValid = checkSingleOutputSelect(results)
+    
+    # if it returns true there were no errors, if not it returned an errorMsg,
+    # return it to the user.
+    if (isValid != True):
+        return isValid
+    # make sure that row is holding an int
+    elif (is_int(results[1][0])):
+        return (f"ERROR: {filename_without_extension}.{getTags.__name__}() " + 
+            f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
+            f"(int) but it did not")
+
+    # if there were no errors, set the game_id as the result
+    else:
+        game_id = int(results[1][0])
+    
+
+    response = make_response({"userData":game_id})
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @api.route('/new2FAKey') 
 def new2FAKey():
@@ -898,6 +923,46 @@ def getPlayerName(user_id:str):
     
     return json.dumps({"playerName":results[1][0]})
 
+
+def tagPlayer(human_user_id):
+    '''
+    tags a player
+
+    if there is an error it reurns the error as an errorMsg string
+
+    if there is no error it returns the below json object
+
+    {"rowsEffected":1}
+    '''
+    human_player_id = getPlayer_id(human_user_id)
+
+    time = get_current_time()
+
+    game_id = getActiveGameID()['active_game_id']
+
+    query = "INSERT INTO tag_registry (human_id, time, game_id) VALUES (%s, %s, %s)"
+
+    perams = (human_player_id, time, game_id)
+
+    results = SQL_INSERT(query, perams)
+
+    #if there was an error, reutrn the text of the error
+    if (type(results) == str):
+        return results
+
+    # if there was no error, 
+    else:
+        if (results != 1):
+            return (f"ERROR: the qurry was only suposed to effect 1 row, "+
+            f"but it effected {results}")
+        
+        else:
+            return json.dump({"rowsEffected":results})
+
+    
+
+
+
 def is_int(s):
     try:
         int(s)
@@ -952,6 +1017,19 @@ def checkSingleOutputSelect(results):
     
     else:
         return True
+
+from datetime import datetime
+
+def get_current_time():
+    # Get the current date and time
+    now = datetime.now()
+
+    # Format the date and time as a string in the desired format
+    current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+
+    # Return the formatted string
+    return current_time
+
 
 # if __name__ == "__main__":
 #     print(getAllUserData())

@@ -215,7 +215,7 @@ DROP TABLE IF EXISTS `hvz`.`tag_registry` ;
 
 CREATE TABLE IF NOT EXISTS `hvz`.`tag_registry` (
   `human_id` INT UNSIGNED NOT NULL,
-  `zombie_id` INT UNSIGNED NOT NULL,
+  `zombie_id` INT UNSIGNED NOT NULL DEFAULT 0000001,
   `game_id` INT UNSIGNED NOT NULL,
   `location_exact` VARCHAR(45) NULL DEFAULT NULL,
   `location_discription` VARCHAR(45) NULL DEFAULT NULL,
