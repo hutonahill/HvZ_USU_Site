@@ -1,0 +1,17 @@
+.sign-in-container {
+
+    width: 100% !important;
+    height: 150%;
+
+    background-color: #0f2439;
+}
+
+.SignUp-Card {
+    margin-top: 64px;
+    background: linear-gradient(180deg, #0088cc 0%, #2f4661 79.82%);
+    border-radius: 6px;
+}
+
+.container {
+    min-height: 89vh;
+}
