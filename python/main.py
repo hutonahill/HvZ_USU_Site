@@ -204,6 +204,7 @@ def newGame(gameName:str, startTime:str, game_email_key:str):
         else:
             return json.dump({"rowsEffected":result})
 
+# this wont work if the user has multiple states. i would need to update the query 
 @api.route('/registerUserInGame/<user_id>/<gameName>')
 @api.route('/registerUserInGame/<user_id>/<gameName>/<stateName>')
 def registerUserInGame(user_id:str,  gameName:str, stateName:str = "human"):
@@ -369,6 +370,7 @@ def registerUserInGame(user_id:str,  gameName:str, stateName:str = "human"):
         else:
             return json.dump({"rowsEffected":results})
 
+# this wont work if the user has multiple states. i would need to update the query 
 @api.route('/getSingleUserData/<user_id>') # tested.
 def getSingleUserData(user_id:str):
     '''
