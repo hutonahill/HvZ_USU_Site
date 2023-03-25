@@ -120,7 +120,6 @@ def SQL_UPDATE(query:str, params:tuple=None):
         return f"Error executing query: {err}"
 
 def SQL_example():
-    # Connect to the database
 
 
     #print(type(connection))
@@ -134,9 +133,7 @@ def SQL_example():
 
     # Print the results
     print(result)
-
-    # Close the database connection
-    connection.close()
+    
 
 @api.route('/registerUser/<user_id>/<email>/<discord_id>/<phoneNumber>/<callsign>/<fname>/<lname>')
 def registerUser(user_id:str, A_number:str, email:str, discord_id:str, 
@@ -238,7 +235,7 @@ def registerUserInGame(user_id:str, tag_code:str, gameName:str, stateName:str = 
     # make sure that row is holding an int
     elif (is_int(results[1][0])):
         
-        return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+        return (f"ERROR: {filename_without_extension}.{registerUserInGame.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
             f"(int) but it did not")
 
@@ -265,7 +262,7 @@ def registerUserInGame(user_id:str, tag_code:str, gameName:str, stateName:str = 
     
     # make sure that row is holding an int
     elif (is_int(results[1][0])):
-        return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+        return (f"ERROR: {filename_without_extension}.{registerUserInGame.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
             f"(int) but it did not")
 
@@ -294,7 +291,7 @@ def registerUserInGame(user_id:str, tag_code:str, gameName:str, stateName:str = 
     
     # make sure that row is holding an int
     elif (is_int(results[1][0])):
-        return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+        return (f"ERROR: {filename_without_extension}.{registerUserInGame.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
             f"(int) but it did not")
 
@@ -321,7 +318,7 @@ def registerUserInGame(user_id:str, tag_code:str, gameName:str, stateName:str = 
     
     # make sure that row is holding an int
     elif (is_int(results[1][0])):
-        return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+        return (f"ERROR: {filename_without_extension}.{registerUserInGame.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
             f"(int) but it did not")
 
@@ -385,13 +382,13 @@ def getUserData(user_id:str):
             return results
         # if not, gerate our own.
         else:
-            return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+            return (f"ERROR: {filename_without_extension}.{getUserData.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
                 f"but it returned a `{type(results)}`")
         
     # make sure there are only two rows, the data we want and a header.
     elif (len(results) != 2):
-        return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+        return (f"ERROR: {filename_without_extension}.{getUserData.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return two rows " + 
             f"but it returned {len(results)}")
     
@@ -400,7 +397,7 @@ def getUserData(user_id:str):
         row = results[i]
 
         if (type(row) != list):
-            return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+            return (f"ERROR: {filename_without_extension}.{getUserData.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to " + 
                 f"return a nested list, but row  {i} is a" + 
                 f"'{type(row)}'")
@@ -437,7 +434,7 @@ def getUserData():
             return results
         # if not, gerate our own.
         else:
-            return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+            return (f"ERROR: {filename_without_extension}.{getUserData.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
                 f"but it returned a `{type(results)}`")
     
@@ -446,7 +443,7 @@ def getUserData():
         row = results[i]
 
         if (type(row) != list):
-            return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+            return (f"ERROR: {filename_without_extension}.{getUserData.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to " + 
                 f"return a nested list, but row  {i} is a" + 
                 f"'{type(row)}'")
@@ -463,6 +460,14 @@ def getTags():
 
     {"tags":nestedList}
     '''
+
+    # Get the filename with extension
+    filename = os.path.basename(__file__)
+
+    # Extract the filename without extension (used in returning errors)
+    filename_without_extension = os.path.splitext(filename)[0]
+
+
     # first we get the active game
     # now get the game_id from the gameName
     query = (f"SELECT game_id FROM games WHERE is_game_active = y;")
@@ -476,10 +481,9 @@ def getTags():
     # return it to the user.
     if (isValid != True):
         return isValid
-    
     # make sure that row is holding an int
     elif (is_int(results[1][0])):
-        return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+        return (f"ERROR: {filename_without_extension}.{getTags.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
             f"(int) but it did not")
 
@@ -508,7 +512,7 @@ def getTags():
             return results
         # if not, gerate our own.
         else:
-            return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+            return (f"ERROR: {filename_without_extension}.{getTags.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
                 f"but it returned a `{type(results)}`")
     
@@ -517,7 +521,7 @@ def getTags():
         row = results[i]
 
         if (type(row) != list):
-            return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+            return (f"ERROR: {filename_without_extension}.{getTags.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to " + 
                 f"return a nested list, but row  {i} is a" + 
                 f"'{type(row)}'")
@@ -553,13 +557,13 @@ def check2FAKey(user_id, code):
             return results
         # if not, gerate our own.
         else:
-            return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+            return (f"ERROR: {filename_without_extension}.{check2FAKey.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
                 f"but it returned a `{type(results)}`")
         
     # make sure there are only two rows, the data we want and a header.
     elif (len(results) != 2):
-        return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+        return (f"ERROR: {filename_without_extension}.{check2FAKey.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return two rows " + 
             f"but it returned {len(results)}")
     
@@ -568,7 +572,7 @@ def check2FAKey(user_id, code):
         row = results[i]
 
         if (type(row) != list):
-            return (f"ERROR: {filename_without_extension}.{registerUser.__name__}() " + 
+            return (f"ERROR: {filename_without_extension}.{check2FAKey.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to " + 
                 f"return a nested list, but row  {i} is a" + 
                 f"'{type(row)}'")
@@ -581,6 +585,196 @@ def check2FAKey(user_id, code):
     authenticated = totp.verify(code)
 
     return authenticated
+
+@api.route('/generateQRCode/<url>') 
+def generateQRCode(url):
+    import os
+    import qrcode
+
+    # create QR code object
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(url)
+    qr.make(fit=True)
+
+    # generate image from QR code
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    # create directory if it doesn't exist
+    directory = "../images"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # save image to directory and return filepath
+    filepath = os.path.join(directory, "qr_code.png")
+    count = 1
+    while os.path.exists(filepath):
+        # append number to filename if filepath already exists
+        filepath = os.path.join(directory, f"qr_code_{count}.png")
+        count += 1
+    img.save(filepath)
+    return filepath
+
+
+def getTagPageInfo(user_id:str):
+    '''
+    check if a tag page exists for a player and returns all the data asoceated 
+    with it.
+
+    reuturns true if a game is active and the player is un-registered
+    returns false if there are no active games
+    returns a stirng if an error occured
+    returns a json with all relivent player, game, and state data in the below json format
+    '''
+    player_id = getPlayer_id(user_id)["player_id"]
+
+    # Get the filename with extension
+    filename = os.path.basename(__file__)
+
+    # Extract the filename without extension (used in returning errors)
+    filename_without_extension = os.path.splitext(filename)[0]
+
+    # check if there is a active game, if there is, get the game_id.
+    query = (f"SELECT game_id FROM games WHERE is_game_active = y;")
+
+    results = SQL_SELECT (query)
+
+    # run a battery of tests on the result to make sure its in the propper format
+    isValid = checkSingleOutputSelect(results)
+    
+    # if it returns true there were no errors, if not it returned an errorMsg,
+    # return it to the user.
+    if (len(results) == 1):
+        return False
+    elif (isValid != True):
+        return isValid
+    # make sure that row is holding an int
+    elif (is_int(results[1][0])):
+        return (f"ERROR: {filename_without_extension}.{getTagPageInfo.__name__}() " + 
+            f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
+            f"(int) but it did not")
+
+    # if there were no errors, set the game_id as the result
+    else:
+        game_id = int(results[1][0])
+    
+    # check the user Registration
+    # check if there is a active game, if there is, get the game_id.
+    query = (f"SELECT state_id FROM players_games WHERE player_id = %s AND game_id = %s;")
+
+    perams = (player_id, game_id)
+
+    results = SQL_SELECT (query, perams)
+
+    # run a battery of tests on the result to make sure its in the propper format
+    isValid = checkSingleOutputSelect(results)
+    
+    # if it returns true there were no errors, if not it returned an errorMsg,
+    # return it to the user.
+    
+    if(len(results) == 1):
+        return True
+    
+    elif (isValid != True):
+        return isValid
+    # make sure that row is holding an int
+    elif (is_int(results[1][0])):
+        return (f"ERROR: {filename_without_extension}.{getTagPageInfo.__name__}() " + 
+            f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
+            f"(int) but it did not")
+
+    # if there were no errors, set the game_id as the result
+    else:
+        state_id = int(results[1][0])
+    
+    # now we have all our data and we know it exists we can query the player data, game data, and state data
+    query = (f"SELECT * FROM players " + 
+             "LEFT JOIN players_games ON players.player_id = players_games.player_id "+
+             "LEFT JOIN games ON players_games.game_id = games.game_id "+
+             "LEFT JOIN states ON players_games.state_id = states.state_id "+
+             "WHERE players.player_id = %s AND players_games.game_id = %s;")
+
+    perams = (player_id, game_id)
+
+    results = SQL_SELECT (query, perams)
+
+    
+    # if it returns true there were no errors, if not it returned an errorMsg,
+    # return it to the user.
+    if (type(results) != list):
+        return (f"ERROR: {filename_without_extension}.{getTagPageInfo.__name__}() " + 
+            f"expected {filename_without_extension}.SQL_SELECT() to return a nested list " + 
+            f"but it returned a '{type(results)}'")
+
+    for i  in range(len(results)):
+        row = results[i]
+
+        if type(row) != list:
+            return (f"ERROR: {filename_without_extension}.{getTagPageInfo.__name__}() " + 
+                f"expected {filename_without_extension}.SQL_SELECT() to return a nested list " + 
+                f"but it returned a list containing a '{type(results)}'")
+
+
+    return json.dumps({"results": results})
+
+        
+
+
+
+    
+
+@api.route('/getPlayer_id/<user_id>') 
+def getPlayer_id(user_id:str):
+    '''
+    returns a player_id for a given user_id.
+
+    if there was an error, returns the error as a string
+
+    if no error, returns a json object in the below format
+
+    {"player_id":results}
+    '''
+    query = (f"SELECT player_id FROM players WHERE user_id = %s;")
+
+    perams = (user_id,)
+    
+    results = SQL_SELECT (query, perams)
+    
+
+    # Get the filename with extension
+    filename = os.path.basename(__file__)
+
+    # Extract the filename without extension (used in returning errors)
+    filename_without_extension = os.path.splitext(filename)[0]
+
+    # if results is not a list there was an error
+    if (type(results != list)):
+        # if its a string, it contains an error msg
+        if (type(results) == str):
+            return results
+        # if not, gerate our own.
+        else:
+            return (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
+                f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
+                f"but it returned a `{type(results)}`")
+        
+    # make sure there are only two rows, the data we want and a header.
+    elif (len(results) != 2):
+        return (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
+            f"expected {filename_without_extension}.SQL_SELECT() to return two rows " + 
+            f"but it returned {len(results)}")
+    
+    # make sure every row is a list
+    for i in range(len(results)):
+        row = results[i]
+
+        if (type(row) != list):
+            return (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
+                f"expected {filename_without_extension}.SQL_SELECT() to " + 
+                f"return a nested list, but row  {i} is a" + 
+                f"'{type(row)}'")
+    
+    return json.dumps({"player_id":results[1][0]})
+
 
 def is_int(s):
     try:
@@ -644,3 +838,4 @@ if __name__ == "__main__":
 # AS AN API!
 # if __name__ == '__main__':
 #     api.run()
+#     connection.close()

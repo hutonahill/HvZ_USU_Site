@@ -60,18 +60,18 @@ required functions
 	new2FA() done
 		returns a new 2FA_key.
 	
-	generateQRCode()
+	generateQRCode() done
 		peramiters
 			- url
 			- filepath
 	
-	exicuteSelect()
+	exicuteSelect() done
 		peramiters
 			- MySQL select statment
 		
 		returns a nested list table of results (the errorMsg if error).
 	
-	exicuteInsert()
+	exicuteInsert() done
 		peramiters
 			- MySQL insert statment
 		
@@ -81,7 +81,7 @@ required functions
 		peramiters
 			- code
 		
-		reuturns true if a game is active and the code is unassigned
+		reuturns true if a game is active and the player is un-registered
 		returns false if there are no active games
 		returns a stirng if an error occured
 		returns a list containing the player name and tag_code
