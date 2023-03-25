@@ -8,6 +8,8 @@ export default function AllPlayers() {
     const [searchInput, setSearchInput] = useState("");
     const [inputText, setInputText] = useState("");
     const [filterRole, setFilterRole] = useState("");
+    const [status, setStatus] = useState("admin")
+
     let navigate = useNavigate()
 
     function handleSubmit(item) {
@@ -29,9 +31,9 @@ export default function AllPlayers() {
             return el
         }
     })
-  return (
+    if (status == "admin") { return(
     <div className='all-players-background'>
-        <input className="search" type="text" placeholder="Search for a Hero" onChange={inputHandler} value={searchInput}/>
+        <input className="search" type="text" placeholder="Search for a Player" onChange={inputHandler} value={searchInput}/>
         <div className="list">
             <div className="player-list">
                 {filteredData.map((item) => (
@@ -45,6 +47,10 @@ export default function AllPlayers() {
                 ))}
         </div>
     </div>
-    </div>
-  )
+    </div>)
+    } else {
+        return (
+            <Navigate to={'/'}/>
+        )
+    }
 }

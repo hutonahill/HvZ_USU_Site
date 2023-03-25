@@ -44,11 +44,11 @@ export default function SignIn() {
               {error && <Alert variant="danger">{error}</Alert>}
               
               <Form onSubmit={handleSubmit}>
-                <Form.Group id="email" className="mt-4">
+                <Form.Group id="email" className="mt-4 text-white">
                   <Form.Label>Email</Form.Label>
                   <Form.Control type="email" ref={emailRef} required />
                 </Form.Group>
-                <Form.Group id="password" className="mt-4">
+                <Form.Group id="password" className="mt-4 text-white">
                   <Form.Label>Password</Form.Label>
                   <Form.Control type="password" ref={passwordRef} required />
                 </Form.Group>
