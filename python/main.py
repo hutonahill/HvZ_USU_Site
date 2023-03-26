@@ -1,9 +1,11 @@
+import sys
 import mysql.connector
 import json
-from flask import Flask, json
+from flask import Flask, json, request
 from flask import make_response
 import os
 import inspect
+import importlib
 
 api = Flask(__name__)
 
@@ -14,6 +16,142 @@ connection = mysql.connector.connect(
     password="password",
     database="hvz"
 )
+
+
+# this wont work if the user has multiple states. i would need to update the query 
+@api.route('/getSingleUserData/<user_id>')
+def getSingleUserData(user_id:str):
+    '''
+    returns all user data assoceated with a user_id
+
+    returns a string if there was an error
+    returns a json in the below format if everything went smothely 
+
+    {"userData":nestedList}
+    '''
+    
+    # the query to be sent to the SQL database
+    query = (f"SELECT players.player_id, user_id, a_number, callsign, fname, lname, email, state " + 
+             "FROM players " + 
+             "LEFT JOIN players_games ON players.player_id = players_games.player_id " +
+             "LEFT JOIN states ON players_games.state_id = states.state_id " +
+            "WHERE user_id = %s;")
+
+    # the peramiters. 
+    # corisponds to %s in the query in order of appearance
+    # i think this helps sidestep SQL injection attacks
+    # alwasy use this mehtod for any kind of userInput data
+    perams = (user_id,)
+    
+    results = SQL_SELECT (query, perams)
+    
+
+    # Get the filename with extension
+    filename = os.path.basename(__file__)
+
+    # Extract the filename without extension (used in returning errors)
+    filename_without_extension = os.path.splitext(filename)[0]
+
+    # if results is not a list there was an error
+    if (type(results) != list):
+        # if its a string, it contains an error msg
+        if (type(results) == str):
+            print(results)
+            return results
+        # if not, gerate our own.
+        else:
+            errorMsg = (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
+                f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
+                f"but it returned a `{type(results)}`")
+            print(errorMsg)
+            return errorMsg
+        
+    # make sure there are only two rows, the data we want and a header.
+    elif (len(results) != 2):
+        errorMsg = (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
+            f"expected {filename_without_extension}.SQL_SELECT() to return two rows " + 
+            f"but it returned {len(results)}")
+        print(errorMsg)
+        return errorMsg
+    
+    # make sure every row is a list
+    for i in range(len(results)):
+        row = results[i]
+
+        if (type(row) != list):
+            errorMsg = (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
+                f"expected {filename_without_extension}.SQL_SELECT() to " + 
+                f"return a nested list, but row  {i} is a" + 
+                f"'{type(row)}'")
+            print(errorMsg)
+            return errorMsg
+    
+    response = make_response({"userData":results})
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+@api.route('/getAllUserData')
+def getAllUserData():
+    '''
+    returns all user data.
+
+    returns a string if there was an error
+    returns a json in the below format if everything went smothely 
+
+    {"userData":nestedList}
+    '''
+    # the query to be sent to the SQL database
+    query = (f"SELECT players.player_id, user_id, a_number, callsign, fname, lname, email, state " + 
+             "FROM players " + 
+             "LEFT JOIN players_games ON players.player_id = players_games.player_id " +
+             "LEFT JOIN states ON players_games.state_id = states.state_id;")
+
+    # send the query
+    results = SQL_SELECT (query)
+    
+
+    # Get the filename with extension
+    filename = os.path.basename(__file__)
+
+    # Extract the filename without extension (used in returning errors)
+    filename_without_extension = os.path.splitext(filename)[0]
+
+    # if results is not a list there was an error
+    resultsType = type(results)
+    if (type(results)!= list):
+        # if its a string, it contains an error msg
+        if (type(results) == str):
+            return results
+        # if not, gerate our own.
+        else:
+            errorMsg = (f"ERROR: {filename_without_extension}.{getAllUserData.__name__}() " + 
+                f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
+                f"but it returned a `{str(type(results))}`")
+            print(errorMsg)
+            return errorMsg
+    
+    # make sure every row is a list
+    for i in range(len(results)):
+        row = results[i]
+
+        if (type(row) != list):
+            errorMsg = (f"ERROR: {filename_without_extension}.{getAllUserData.__name__}() " + 
+                f"expected {filename_without_extension}.SQL_SELECT() to " + 
+                f"return a nested list, but row  {i} is a" + 
+                f"'{type(row)}'")
+            print(errorMsg)
+            return errorMsg
+    
+
+
+    response = make_response({"userData":results})
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+
+
 
 @api.route('/SQL_SELECT/querry')
 def SQL_SELECT( query:str, params:tuple=None):
@@ -166,8 +304,10 @@ def registerUser(user_id:str, a_number:str, email:str, callsign:str, fname:str, 
     # if there was no error, 
     else:
         if (result != 1):
-            return (f"ERROR: the qurry was only suposed to effect 1 row, "+
+            errorMsg = (f"ERROR: the qurry was only suposed to effect 1 row, "+
             f"but it effected {result}")
+            print(errorMsg)
+            return errorMsg
         
         else:
             return json.dump({"rowsEffected":result})
@@ -198,14 +338,13 @@ def newGame(gameName:str, startTime:str, game_email_key:str):
     # if there was no error, 
     else:
         if (result != 1):
-            return (f"ERROR: the qurry was only suposed to effect 1 row, "+
+            errorMsg = (f"ERROR: the qurry was only suposed to effect 1 row, "+
             f"but it effected {result}")
+            print(errorMsg)
+            return errorMsg
         
         else:
             return json.dump({"rowsEffected":result})
-
-
-
 
 # this wont work if the user has multiple states. i would need to update the query 
 @api.route('/registerUserInGame/<user_id>/<gameName>')
@@ -245,10 +384,11 @@ def registerUserInGame(user_id:str,  gameName:str, stateName:str = "human"):
     
     # make sure that row is holding an int
     elif (is_int(results[1][0])):
-        
-        return (f"ERROR: {filename_without_extension}.{registerUserInGame.__name__}() " + 
+        errorMsg = (f"ERROR: {filename_without_extension}.{registerUserInGame.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
             f"(int) but it did not")
+        print(errorMsg)
+        return errorMsg
 
     # if no errors were called, set player_id to the result
     else:
@@ -277,15 +417,15 @@ def registerUserInGame(user_id:str,  gameName:str, stateName:str = "human"):
     
     # make sure that row is holding an int
     elif (is_int(results[1][0])):
-        return (f"ERROR: {filename_without_extension}.{registerUserInGame.__name__}() " + 
+        errorMsg = (f"ERROR: {filename_without_extension}.{registerUserInGame.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
             f"(int) but it did not")
+        print(errorMsg)
+        return errorMsg
 
     # if there were no errors, set the game_id as the result
     else:
         game_id = int(results[1][0])
-
-
 
 
     # look up, the code_id based on code
@@ -310,9 +450,11 @@ def registerUserInGame(user_id:str,  gameName:str, stateName:str = "human"):
     
     # make sure that row is holding an int
     elif (is_int(results[1][0])):
-        return (f"ERROR: {filename_without_extension}.{registerUserInGame.__name__}() " + 
+        errorMsg = (f"ERROR: {filename_without_extension}.{registerUserInGame.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
             f"(int) but it did not")
+        print(errorMsg)
+        return errorMsg
 
     # if there were no errors, set the game_id as the result
     else:
@@ -341,9 +483,12 @@ def registerUserInGame(user_id:str,  gameName:str, stateName:str = "human"):
     
     # make sure that row is holding an int
     elif (is_int(results[1][0])):
-        return (f"ERROR: {filename_without_extension}.{registerUserInGame.__name__}() " + 
+        
+        errorMsg = (f"ERROR: {filename_without_extension}.{registerUserInGame.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
             f"(int) but it did not")
+        print(errorMsg)
+        return errorMsg
 
     # if there were no errors, set the game_id as the result
     else:
@@ -367,149 +512,18 @@ def registerUserInGame(user_id:str,  gameName:str, stateName:str = "human"):
     else:
         # make sure the json contians 1. otherwise theres a problem.
         if (results != 1):
-            return (f"ERROR: the qurry was only suposed to effect 1 row, "+
+            errorMsg = (f"ERROR: the qurry was only suposed to effect 1 row, "+
             f"but it effected {results}")
-        
-        else:
-            return json.dump({"rowsEffected":results})
-
-# this wont work if the user has multiple states. i would need to update the query 
-@api.route('/getSingleUserData/<user_id>') # tested.
-def getSingleUserData(user_id:str):
-    '''
-    returns all user data assoceated with a user_id
-
-    returns a string if there was an error
-    returns a json in the below format if everything went smothely 
-
-    {"userData":nestedList}
-    '''
-    
-    # the query to be sent to the SQL database
-    query = (f"SELECT players.player_id, user_id, a_number, callsign, fname, lname, email, state " + 
-             "FROM players " + 
-             "LEFT JOIN players_games ON players.player_id = players_games.player_id " +
-             "LEFT JOIN states ON players_games.state_id = states.state_id " +
-            "WHERE user_id = %s;")
-
-    # the peramiters. 
-    # corisponds to %s in the query in order of appearance
-    # i think this helps sidestep SQL injection attacks
-    # alwasy use this mehtod for any kind of userInput data
-    perams = (user_id,)
-    
-    results = SQL_SELECT (query, perams)
-    
-
-    # Get the filename with extension
-    filename = os.path.basename(__file__)
-
-    # Extract the filename without extension (used in returning errors)
-    filename_without_extension = os.path.splitext(filename)[0]
-
-    # if results is not a list there was an error
-    if (type(results) != list):
-        # if its a string, it contains an error msg
-        if (type(results) == str):
-            print(results)
-            return results
-        # if not, gerate our own.
-        else:
-            errorMsg = (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
-                f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
-                f"but it returned a `{type(results)}`")
             print(errorMsg)
             return errorMsg
         
-    # make sure there are only two rows, the data we want and a header.
-    elif (len(results) != 2):
-        errorMsg = (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
-            f"expected {filename_without_extension}.SQL_SELECT() to return two rows " + 
-            f"but it returned {len(results)}")
-        print(errorMsg)
-        return errorMsg
-    
-    # make sure every row is a list
-    for i in range(len(results)):
-        row = results[i]
-
-        if (type(row) != list):
-            errorMsg = (f"ERROR: {filename_without_extension}.{getSingleUserData.__name__}() " + 
-                f"expected {filename_without_extension}.SQL_SELECT() to " + 
-                f"return a nested list, but row  {i} is a" + 
-                f"'{type(row)}'")
-            print(errorMsg)
-            return errorMsg
-    
-    response = make_response({"userData":results})
-    response.mimetype = 'application/json'
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response
-
-
-
-
-
-
-@api.route('/getAllUserData') # tested.
-def getAllUserData():
-    '''
-    returns all user data.
-
-    returns a string if there was an error
-    returns a json in the below format if everything went smothely 
-
-    {"userData":nestedList}
-    '''
-    # the query to be sent to the SQL database
-    query = (f"SELECT players.player_id, user_id, a_number, callsign, fname, lname, email, state " + 
-             "FROM players " + 
-             "LEFT JOIN players_games ON players.player_id = players_games.player_id " +
-             "LEFT JOIN states ON players_games.state_id = states.state_id;")
-
-    # send the query
-    results = SQL_SELECT (query)
-    
-
-    # Get the filename with extension
-    filename = os.path.basename(__file__)
-
-    # Extract the filename without extension (used in returning errors)
-    filename_without_extension = os.path.splitext(filename)[0]
-
-    # if results is not a list there was an error
-    resultsType = type(results)
-    if (type(results)!= list):
-        # if its a string, it contains an error msg
-        if (type(results) == str):
-            return results
-        # if not, gerate our own.
         else:
-            errorMsg = (f"ERROR: {filename_without_extension}.{getAllUserData.__name__}() " + 
-                f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
-                f"but it returned a `{str(type(results))}`")
-            print(errorMsg)
-            return errorMsg
-    
-    # make sure every row is a list
-    for i in range(len(results)):
-        row = results[i]
+            response = make_response({"rowsEffected":results})
+            response.mimetype = 'application/json'
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
 
-        if (type(row) != list):
-            errorMsg = (f"ERROR: {filename_without_extension}.{getAllUserData.__name__}() " + 
-                f"expected {filename_without_extension}.SQL_SELECT() to " + 
-                f"return a nested list, but row  {i} is a" + 
-                f"'{type(row)}'")
-            print(errorMsg)
-            return errorMsg
-    
-
-
-    response = make_response({"userData":results})
-    response.mimetype = 'application/json'
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response
-
+# NOT DONE
 @api.route('/getTags')
 def getTags():
     '''
@@ -530,8 +544,10 @@ def getTags():
 
     game_id = getActiveGameID()
     
-
-    query = (f"SELECT * FROM tag_registry WHERE game_id = %s;")
+    # NOT DONE
+    query = ("SELECT gameName FROM tag_registry " +
+             "LEFT JOIN games ON tag_registry.game_id = games.game_id " + 
+             "WHERE game_id = %s;")
 
     # the peramiters. 
     # corisponds to %s in the query in order of appearance
@@ -539,7 +555,7 @@ def getTags():
     # alwasy use this mehtod for any kind of userInput data
     perams = (game_id, )
     
-    results = SQL_SELECT (query)
+    results = SQL_SELECT (query, perams)
     
 
     # Get the filename with extension
@@ -555,21 +571,27 @@ def getTags():
             return results
         # if not, gerate our own.
         else:
-            return (f"ERROR: {filename_without_extension}.{getTags.__name__}() " + 
+            errorMsg = (f"ERROR: {filename_without_extension}.{getTags.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
                 f"but it returned a `{type(results)}`")
-    
+            print(errorMsg)
+            return errorMsg
     # make sure every row is a list
     for i in range(len(results)):
         row = results[i]
 
         if (type(row) != list):
-            return (f"ERROR: {filename_without_extension}.{getTags.__name__}() " + 
+            errorMsg = (f"ERROR: {filename_without_extension}.{getTags.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to " + 
                 f"return a nested list, but row  {i} is a" + 
                 f"'{type(row)}'")
-    
-    return json.dumps({"tags":results})
+            print(errorMsg)
+            return errorMsg
+        
+    response = make_response({"tags":results})
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @api.route('/getActiveGameID')
 def getActiveGameID():
@@ -580,7 +602,7 @@ def getActiveGameID():
     
     if theres no error it returns a json object in the below format:
     
-    {"active_game_id":resutlts}
+    {"activeGameID":int}
     '''
     # Get the filename with extension
     filename = os.path.basename(__file__)
@@ -603,29 +625,51 @@ def getActiveGameID():
         return isValid
     # make sure that row is holding an int
     elif (is_int(results[1][0])):
-        return (f"ERROR: {filename_without_extension}.{getTags.__name__}() " + 
+        
+        errorMsg = (f"ERROR: {filename_without_extension}.{getTags.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
             f"(int) but it did not")
-
+        print(errorMsg)
+        return errorMsg
     # if there were no errors, set the game_id as the result
     else:
         game_id = int(results[1][0])
     
 
-    response = make_response({"userData":game_id})
+    response = make_response({"activeGameID":game_id})
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
 @api.route('/new2FAKey') 
 def new2FAKey():
+    '''
+    returns a new 2FAKey
+
+    returns a json object with the below format:
+
+    {"2FAKey":int}
+    '''
     from pyotp import random_base32
 
-    return json.dump(random_base32())
+    response = make_response({"2FAKey":random_base32()})
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @api.route('/check2FAKey/<user_id>/<code>') 
 def check2FAKey(user_id, code):
     
+    '''
+    given a user_id and a code, checks a given 2FA code.
+
+    if there was an error, returns the error msg as a string
+
+    if no error returns a json object with the below format:
+    
+    {"validCode":bool}
+    '''
+
     query = (f"SELECT twoFA_key FROM players WHERE user_id = %s;")
 
     # the peramiters. 
@@ -677,10 +721,23 @@ def check2FAKey(user_id, code):
     totp = TOTP(secretKey)
     authenticated = totp.verify(code)
 
-    return authenticated
+    
+
+    response = make_response({"validCode":authenticated})
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @api.route('/generateQRCode/<url>') 
 def generateQRCode(url):
+    '''
+    given a url, generates a QR code and saves it to ../images
+
+    returns a json object with the below format:
+
+    {"QRPath":string}
+    '''
+    
     import os
     import qrcode
 
@@ -705,7 +762,14 @@ def generateQRCode(url):
         filepath = os.path.join(directory, f"qr_code_{count}.png")
         count += 1
     img.save(filepath)
-    return filepath
+
+    json = {"QRPath":filepath}
+
+    response = make_response({"QRPath":filepath})
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
 
 @api.route('/getTagPageInfo/<user_id>') 
 def getTagPageInfo(user_id:str):
@@ -742,9 +806,11 @@ def getTagPageInfo(user_id:str):
         return isValid
     # make sure that row is holding an int
     elif (is_int(results[1][0])):
-        return (f"ERROR: {filename_without_extension}.{getTagPageInfo.__name__}() " + 
+        errorMsg = (f"ERROR: {filename_without_extension}.{getTagPageInfo.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return a player_id " + 
             f"(int) but it did not")
+        print(errorMsg)
+        return errorMsg
 
     # if there were no errors, set the game_id as the result
     else:
@@ -802,20 +868,28 @@ def getTagPageInfo(user_id:str):
     # if it returns true there were no errors, if not it returned an errorMsg,
     # return it to the user.
     if (type(results) != list):
-        return (f"ERROR: {filename_without_extension}.{getTagPageInfo.__name__}() " + 
+        errorMsg = (f"ERROR: {filename_without_extension}.{getTagPageInfo.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return a nested list " + 
             f"but it returned a '{type(results)}'")
+        
+        print(errorMsg)
+        return errorMsg
 
     for i  in range(len(results)):
         row = results[i]
 
         if type(row) != list:
-            return (f"ERROR: {filename_without_extension}.{getTagPageInfo.__name__}() " + 
+            errorMsg = (f"ERROR: {filename_without_extension}.{getTagPageInfo.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return a nested list " + 
-                f"but it returned a list containing a '{type(results)}'")
+                f"but it returned a list containing a '{type(row)}'")
+            print(errorMsg)
+            return errorMsg
 
 
-    return json.dumps({"results": results})
+    response = make_response({"results": results})
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @api.route('/getPlayer_id/<user_id>') # Tested 
 def getPlayer_id(user_id:str):
@@ -852,15 +926,19 @@ def getPlayer_id(user_id:str):
             return results
         # if not, gerate our own.
         else:
-            return (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
+            errorMsg = (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
                 f"but it returned a `{type(results)}`")
+            print(errorMsg)
+            return errorMsg
         
     # make sure there are only two rows, the data we want and a header.
     elif (len(results) != 2):
-        return (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
+        errorMsg = (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return two rows " + 
             f"but it returned {len(results)}")
+        print(errorMsg)
+        return errorMsg
     
     # make sure every row is a list
     for i in range(len(results)):
@@ -872,7 +950,11 @@ def getPlayer_id(user_id:str):
                 f"return a nested list, but row  {i} is a" + 
                 f"'{type(row)}'")
     
-    return json.dumps({"player_id":results[1][0]})
+    response = make_response({"player_id":results[1][0]})
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
 
 @api.route('/getPlayerName/<user_id>')
 def getPlayerName(user_id:str):
@@ -885,7 +967,7 @@ def getPlayerName(user_id:str):
 
     {"playerName":results}
     '''
-    query = (f"SELECT IF(callsign IS NULL, CONCAT(fname, ' ',lname), CONCAT(fname, ' ', callsign, ' ', lname )) AS playerName FROM players WHERE user_id = %s;")
+    query = (f"SELECT IF(callsign IS NULL, CONCAT(fname, ' ',lname), CONCAT(fname, ' \\\'', callsign, '\\\' ', lname )) AS playerName FROM players WHERE user_id = %s;")
 
     # the peramiters. 
     # corisponds to %s in the query in order of appearance
@@ -909,29 +991,221 @@ def getPlayerName(user_id:str):
             return results
         # if not, gerate our own.
         else:
-            return (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
+            errorMsg =(f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
                 f"but it returned a `{type(results)}`")
+            print(errorMsg) 
+            return errorMsg
         
     # make sure there are only two rows, the data we want and a header.
     elif (len(results) != 2):
-        return (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
+        errorMsg = (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
             f"expected {filename_without_extension}.SQL_SELECT() to return two rows " + 
             f"but it returned {len(results)}")
+        print(errorMsg)
+        return errorMsg
     
     # make sure every row is a list
     for i in range(len(results)):
         row = results[i]
 
         if (type(row) != list):
-            return (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
+            errorMsg = (f"ERROR: {filename_without_extension}.{getPlayer_id.__name__}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to " + 
                 f"return a nested list, but row  {i} is a" + 
                 f"'{type(row)}'")
+            print(errorMsg)
+            return errorMsg
     
-    return json.dumps({"playerName":results[1][0]})
+    response = make_response({"playerName":results[1][0]})
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+@api.route('/toggleGamePause')
+def toggleGamePause():
+    '''
+    togles the pause state of the active game.
+
+    if there was an error, ereturns the errormsg as a string
+
+    if no error returns the below json object
+
+    {"pauseRowsEffected":1}
+    '''
+
+    # Get the filename with extension
+    filename = os.path.basename(__file__)
+
+    # Extract the filename without extension (used in returning errors)
+    filename_without_extension = os.path.splitext(filename)[0]
+    
+    game_id = getActiveGameID()
+
+    # determine the curent state of the of the game 
+    query = "SELECT is_safe_active FROM games WHERE game_id = %s"
+    perams = (game_id, )
+
+    results = SQL_SELECT(query, perams)
+
+    isValid = checkSingleOutputSelect(results)
+
+    if (isValid != True):
+        return isValid
+    
+    elif (results[1][0] != 'y' and results[1][0] != 'n'):
+        errorMsg = (
+            f"ERROR: {filename_without_extension}.{registerUserInGame.__name__}() " + 
+            f"expected {filename_without_extension}.SQL_SELECT() to return a game_id " + 
+            f"(int) but it did not."
+        )
+
+        print(errorMsg)
+        return errorMsg
+    
+    else:
+        currentState = results[1][0]
+
+    if (currentState == 'n'):
+        newState = 'y'
+    else:
+        newState = 'n'
+
+    query = ("UPDATE games SET is_save_active = %s WHERE game_id = %s")
+
+    perams = (newState, game_id)
+
+    results = SQL_UPDATE(query, perams)
+
+    # if there was an error, reutrn the text of the error
+    if (type(results) == str):
+        return results
+
+    # if there was no error, return the json.
+    else:
+        # make sure the json contians 1. otherwise theres a problem.
+        if (results != 1):
+            errorMsg = (f"ERROR: the qurry was only suposed to effect 1 row, "+
+            f"but it effected {results}")
+            print(errorMsg)
+            return errorMsg
+        
+        else:
+            response = make_response({"rowsEffected":results})
+            response.mimetype = 'application/json'
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
+
+@api.route('/setActiveGame/<game_id>')
+def setActiveGame(game_id:str):
+    '''
+    sets the active game to the game spesified
+
+    if there was an error, returns the errorMsg as a string
+
+    if there was no error returns the below json object.
+
+    {"updateDeactivateRowsEffected":int, "updateActivateRowsEffected":1}
+    '''
+    # set the current active game as inactive
+    query = "UPDATE games SET is_game_active = 'n'"
+
+    results = SQL_UPDATE(query)
+
+    output = {}
+
+    # if there was an error, reutrn the text of the error
+    if (type(results) == str):
+        return results
+
+    else:
+        output["updateDeactivateRowsEffected"] = results
+
+    
+    # now update the spesified game to be the active one
+
+    query = "UPDATE games SET is_game_active = 'y' WHERE game_id = %s"
+
+    perams = (game_id, )
+
+    results = SQL_UPDATE(query, perams)
+
+    # if there was an error, reutrn the text of the error
+    if (type(results) == str):
+        return results
+
+    # if there was no error, return the json.
+    else:
+        # make sure the json contians 1. otherwise theres a problem.
+        if (results != 1):
+            errorMsg = (f"ERROR: the qurry was only suposed to effect 1 row, "+
+            f"but it effected {results}")
+            print(errorMsg)
+            return errorMsg
+        
+        else:
+            output["updateActivateRowsEffected"] = results
+        
+    response = make_response(output)
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+@api.route('/getAllGameData')
+def getAllGameData():
+    '''
+    returns all relivent data about all game
+
+    if there is an error, returns the errorMsg as a string
+
+    if no error, returns a json object in the below format:
+    
+    {"gameData":nestedList}
+    '''
+
+    query = "SELECT * FROM games"
+
+    results = SQL_SELECT(query)
 
 
+    # Get the filename with extension
+    filename = os.path.basename(__file__)
+
+    # Extract the filename without extension (used in returning errors)
+    filename_without_extension = os.path.splitext(filename)[0]
+
+    if (type(results) != list):
+        pass
+    elif(type(results[0]) != list):
+        errorMsg = (f"ERROR: {filename_without_extension}.{getAllGameData.__name__}() " + 
+                f"expected {filename_without_extension}.SQL_SELECT() to return a nested list " + 
+                f"but it returned a '{type(results)}'")
+        print(errorMsg)
+        return(errorMsg)
+    
+    for i in range(len(results)):
+
+        row = results[i]
+
+        if (type(row) != list):
+
+            errorMsg = (f"ERROR: {filename_without_extension}.{getAllGameData.__name__}() " + 
+                    f"expected {filename_without_extension}.SQL_SELECT() to return a nested list " + 
+                    f"but it returned a list containing a '{type(results)} at index {i}'")
+            print(errorMsg)
+            return errorMsg
+    
+    response = make_response({"gameData":results})
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+    
+
+
+
+
+
+@api.route('/tagPlayer/<human_user_id>')
 def tagPlayer(human_user_id):
     '''
     tags a player
@@ -940,35 +1214,75 @@ def tagPlayer(human_user_id):
 
     if there is no error it returns the below json object
 
-    {"rowsEffected":1}
+    {"insertRowsEffected":1, "updateRowsEffected":1}
     '''
+    # get the player_id
     human_player_id = getPlayer_id(human_user_id)
 
+    # get the current time
     time = get_current_time()
 
+    # the the active game_id
     game_id = getActiveGameID()['active_game_id']
 
+    # the query to send to MySQL
     query = "INSERT INTO tag_registry (human_id, time, game_id) VALUES (%s, %s, %s)"
 
+    # the peramiters. 
+    # corisponds to %s in the query in order of appearance
+    # i think this helps sidestep SQL injection attacks
+    # alwasy use this mehtod for any kind of userInput data
     perams = (human_player_id, time, game_id)
 
+    # send the query
     results = SQL_INSERT(query, perams)
+
+    
+    #if there was an error, reutrn the text of the error
+    if (type(results) == str):
+        return results
+
+    # if there was no error, 
+
+    # make sure only one row was affected.
+    if (results != 1):
+        errorMsg = (f"ERROR: the qurry was only suposed to effect 1 row, "+
+        f"but it effected {results}")
+        print(errorMsg)
+        return errorMsg
+    
+    
+    # create an output var
+    output = {}
+
+    # save the results 
+    output["insertRowsEffected"] = results
+
+    query = ("UPDATE players_games SET state_id = (SELECT state_id FROM states WHERE state LIKE 'zombie') WHERE player_id = %s AND game_id = %s")
+
+    perams = (human_player_id, game_id)
+
+    results = SQL_UPDATE(query, perams)
 
     #if there was an error, reutrn the text of the error
     if (type(results) == str):
         return results
 
     # if there was no error, 
-    else:
-        if (results != 1):
-            return (f"ERROR: the qurry was only suposed to effect 1 row, "+
-            f"but it effected {results}")
-        
-        else:
-            return json.dump({"rowsEffected":results})
 
+    # make sure only one row was affected.
+    if (results != 1):
+        errorMsg = (f"ERROR: the qurry was only suposed to effect 1 row, "+
+        f"but it effected {results}")
+        print(errorMsg)
+        return errorMsg
     
+    output["updateRowsEffected"] = results
 
+    response = make_response(output)
+    response.mimetype = 'application/json'
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 def is_int(s):
@@ -984,51 +1298,60 @@ def checkSingleOutputSelect(results):
 
     if there is no error, it returns true, otherwise it returns the error as a str.
     '''
-    
+    filename = os.path.basename(__file__)
+
+    # Extract the filename without extension
+    filename_without_extension = os.path.splitext(filename)[0]
+
     # make sure SQL_SELECT returned a list
     if (type(results) != list):
         
         if (type(results) == str):
             return results
         else:
-
-            filename = os.path.basename(__file__)
-
-            # Extract the filename without extension
-            filename_without_extension = os.path.splitext(filename)[0]
             
-            return (f"ERROR: {filename_without_extension}." + 
+            errorMsg = (f"ERROR: {filename_without_extension}." + 
                     f"{inspect.currentframe().f_back.f_code.co_name}() " + 
                     f"expected {filename_without_extension}.SQL_SELECT() to return a list " + 
                     f"but it rerned a '{type(results)}'")
+            print(errorMsg)
+            return errorMsg
     
     # make sure that list only has one row
     elif (len(results) != 2):
-        return (f"ERROR: {filename_without_extension}." + 
+
+        errorMsg = (f"ERROR: {filename_without_extension}." + 
                 f"{inspect.currentframe().f_back.f_code.co_name}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return 2 rows " + 
                 f"but it rerned {len(results)}")
+        print(errorMsg)
+        return errorMsg
 
     # make sure that row is a list
     elif (type(results[1]) != list):
-        return (f"ERROR: {filename_without_extension}." + 
+        errorMsg = (f"ERROR: {filename_without_extension}." + 
                 f"{inspect.currentframe().f_back.f_code.co_name}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return a nested list " + 
                 f"but it rerned a list containing a '{type(results[1])}'")
+        print(errorMsg)
+        return errorMsg
     
     # make sure that theres only one column
     elif (len(results[0][1]) != 1):
-        return (f"ERROR: {filename_without_extension}." + 
+        errorMsg = (f"ERROR: {filename_without_extension}." + 
                 f"{inspect.currentframe().f_back.f_code.co_name}() " + 
                 f"expected {filename_without_extension}.SQL_SELECT() to return 1 column " + 
                 f"but it rerned {len(results[0])}")
+        
+        print(errorMsg)
+        
+        return errorMsg
     
     else:
         return True
 
-from datetime import datetime
-
 def get_current_time():
+    from datetime import datetime
     # Get the current date and time
     now = datetime.now()
 
@@ -1038,9 +1361,68 @@ def get_current_time():
     # Return the formatted string
     return current_time
 
+def resetFilePath():
+    '''
+    changed the working directory to the directory of the file this is in.
+    '''
+    import os
+    
+    # change working directory to current directory.
+    path = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(path)
+
+import inspect
+import importlib
+from flask import jsonify
+
+@api.route('/help')
+def help():
+    """
+    A Flask API route that returns a list of functions in the file,
+    along with how to call those functions and their descriptions.
+
+    Returns:
+        str: A formatted string containing function names, their
+        parameters, and descriptions.
+    """
+    resetFilePath()
+
+    # Get the name of the current file
+    filename = os.path.basename(__file__)
+    
+    # Open the file for reading
+    with open(filename) as f:
+        # Read all the lines in the file
+        lines = f.readlines()
+
+    # Initialize an empty string to store the formatted output
+    output = ""
+    
+    # Loop through each line in the file
+    for line in lines:
+        
+        # Check if the line starts with "def" (function definition)
+        if line.startswith("def"):
+            # Get the name of the function
+            name = line[4:line.index("(")]
+            
+            # Get the parameters of the function
+            params = line[line.index("(")+1:line.index(")")]
+            
+            # Get the description of the function (in between triple quotes)
+            description = line[line.index('"""')+3:line.rindex('"""')]
+
+            # Format the output with the function name, parameters, and description
+            output += f"<b>{name}</b><br>"
+            output += f"<i>Parameters:</i> {params}<br>"
+            output += f"<i>Description:</i> {description}<br><br>"
+
+    # Return the formatted output as a string
+    return output
+        
 
 # if __name__ == "__main__":
-#     print(getAllUserData())
+#     print(help())
 
 # THIS LINE MUST BE UNCOMMENTED IN ORDER FOR THE PROGRAM TO WORK 
 # AS AN API!
