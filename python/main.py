@@ -90,6 +90,7 @@ def getSingleUserData(user_id:str):
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+setattr(getSingleUserData, 'route', '/getSingleUserData/<user_id>')
 
 @api.route('/getAllUserData')
 def getAllUserData():
@@ -149,11 +150,12 @@ def getAllUserData():
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+setattr(getAllUserData, 'route', '/getAllUserData')
 
 
 
 
-@api.route('/SQL_SELECT/querry')
+@api.route('/SQL_SELECT/<querry>')
 def SQL_SELECT( query:str, params:tuple=None):
     """
     Executes a SELECT query on a MySQL database using prepared statements.
@@ -187,6 +189,7 @@ def SQL_SELECT( query:str, params:tuple=None):
     except mysql.connector.Error as err:
         # Return the error message as a string
         return f"Error executing query: {err}"
+SQL_SELECT.route = '/SQL_SELECT/<querry>'
 
 def SQL_INSERT(query:str, params:tuple=None):
     """
@@ -311,6 +314,7 @@ def registerUser(user_id:str, a_number:str, email:str, callsign:str, fname:str, 
         
         else:
             return json.dump({"rowsEffected":result})
+setattr(registerUser, 'route', '/registerUser/<user_id>/<a_number>/<email>/<fname>/<callsign>/<lname>')
 
 
 @api.route('/newGame/<gameName>/<startTime>/<game_email_key>')
@@ -345,6 +349,7 @@ def newGame(gameName:str, startTime:str, game_email_key:str):
         
         else:
             return json.dump({"rowsEffected":result})
+setattr(newGame, 'route', '/newGame/<gameName>/<startTime>/<game_email_key>')
 
 # this wont work if the user has multiple states. i would need to update the query 
 @api.route('/registerUserInGame/<user_id>/<gameName>')
@@ -522,6 +527,7 @@ def registerUserInGame(user_id:str,  gameName:str, stateName:str = "human"):
             response.mimetype = 'application/json'
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
+setattr(registerUserInGame, 'route', '/registerUserInGame/<user_id>/<gameName>')
 
 # NOT DONE
 @api.route('/getTags')
@@ -592,6 +598,7 @@ def getTags():
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+setattr(getTags, 'route', '/getTags')
 
 @api.route('/getActiveGameID')
 def getActiveGameID():
@@ -640,6 +647,7 @@ def getActiveGameID():
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+setattr(getActiveGameID, 'route', '/getActiveGameID')
 
 @api.route('/new2FAKey') 
 def new2FAKey():
@@ -656,6 +664,7 @@ def new2FAKey():
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+setattr(new2FAKey, 'route', '/new2FAKey')
 
 @api.route('/check2FAKey/<user_id>/<code>') 
 def check2FAKey(user_id, code):
@@ -727,6 +736,7 @@ def check2FAKey(user_id, code):
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+setattr(check2FAKey, 'route', '/check2FAKey/<user_id>/<code>')
 
 @api.route('/generateQRCode/<url>') 
 def generateQRCode(url):
@@ -769,6 +779,7 @@ def generateQRCode(url):
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+generateQRCode.route = '/generateQRCode/<url>'
 
 
 @api.route('/getTagPageInfo/<user_id>') 
@@ -890,6 +901,7 @@ def getTagPageInfo(user_id:str):
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+setattr(getTagPageInfo, 'route', '/getTagPageInfo/<user_id>')
 
 @api.route('/getPlayer_id/<user_id>') # Tested 
 def getPlayer_id(user_id:str):
@@ -954,6 +966,7 @@ def getPlayer_id(user_id:str):
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+setattr(getPlayer_id, 'route', '/getPlayer_id/<user_id>')
 
 
 @api.route('/getPlayerName/<user_id>')
@@ -1021,6 +1034,7 @@ def getPlayerName(user_id:str):
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+setattr(getPlayerName, 'route', '/getPlayerName/<user_id>')
 
 @api.route('/toggleGamePause')
 def toggleGamePause():
@@ -1095,6 +1109,7 @@ def toggleGamePause():
             response.mimetype = 'application/json'
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
+setattr(toggleGamePause, 'route', '/toggleGamePause')
 
 @api.route('/setActiveGame/<game_id>')
 def setActiveGame(game_id:str):
@@ -1150,6 +1165,9 @@ def setActiveGame(game_id:str):
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+setattr(setActiveGame, 'route', '/setActiveGame/<game_id>')
+
+
 
 @api.route('/getAllGameData')
 def getAllGameData():
@@ -1199,7 +1217,7 @@ def getAllGameData():
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
-    
+setattr(getAllGameData, 'route', '/getAllGameData')
 
 
 
@@ -1283,7 +1301,7 @@ def tagPlayer(human_user_id):
     response.mimetype = 'application/json'
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
-
+setattr(tagPlayer, 'route', '/tagPlayer/<human_user_id>')
 
 def is_int(s):
     try:
@@ -1373,53 +1391,48 @@ def resetFilePath():
 
 import inspect
 import importlib
-from flask import jsonify
+from flask import url_for
+import main
 
 @api.route('/help')
 def help():
+    # Get all functions defined in the app
+    funcs = inspect.getmembers(main, predicate=inspect.isfunction)
+    funcs_data = []
+    for func_name, func in funcs:
+        # Ignore the help function itself and any functions without a route attribute
+
+        hasRoute = hasattr(func, 'route')
+
+        if ((func_name != 'help') and (hasRoute == True)):
+
+            # Try to get the URL for the function
+            url = func.route
+            
+            # Get the function's docstring
+            docstring = inspect.getdoc(func)
+            # Add the function data to the list of functions
+            funcs_data.append((func_name, url, docstring))
+    
+    # Generate the HTML response
+    html = '<html><body><div style="width:800px;margin:auto;"><style>.indent{display:inline-block;margin:0 0 0 20px;font-size: 16px;}</style>'
+    for func_name, url, docstring in funcs_data:
+        html += f'<br><br><p style = "font-size: 20px;"><b><u>{func_name}</u></b></p><p class = "indent"><b>Description:</b> <br>{replace_lt_gt(docstring)} <br> <br> <b>URL:</b> <br>{replace_lt_gt(url)}</p>'
+    html += '</div></body></html>'
+    return html
+        
+def replace_lt_gt(string:str):
     """
-    A Flask API route that returns a list of functions in the file,
-    along with how to call those functions and their descriptions.
+    Replaces '<' with '&lt;' and '>' with '&gt;' in a given string.
+
+    Args:
+        string (str): The string to search and replace.
 
     Returns:
-        str: A formatted string containing function names, their
-        parameters, and descriptions.
+        str: The modified string with '<' replaced by '&lt;' and '>' replaced by '&gt;'.
     """
-    resetFilePath()
+    return string.replace('<', '&lt;').replace('>', '&gt;')
 
-    # Get the name of the current file
-    filename = os.path.basename(__file__)
-    
-    # Open the file for reading
-    with open(filename) as f:
-        # Read all the lines in the file
-        lines = f.readlines()
-
-    # Initialize an empty string to store the formatted output
-    output = ""
-    
-    # Loop through each line in the file
-    for line in lines:
-        
-        # Check if the line starts with "def" (function definition)
-        if line.startswith("def"):
-            # Get the name of the function
-            name = line[4:line.index("(")]
-            
-            # Get the parameters of the function
-            params = line[line.index("(")+1:line.index(")")]
-            
-            # Get the description of the function (in between triple quotes)
-            description = line[line.index('"""')+3:line.rindex('"""')]
-
-            # Format the output with the function name, parameters, and description
-            output += f"<b>{name}</b><br>"
-            output += f"<i>Parameters:</i> {params}<br>"
-            output += f"<i>Description:</i> {description}<br><br>"
-
-    # Return the formatted output as a string
-    return output
-        
 
 # if __name__ == "__main__":
 #     print(help())
