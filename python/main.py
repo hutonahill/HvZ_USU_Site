@@ -1417,7 +1417,7 @@ def help():
     # Generate the HTML response
     html = '<html><body><div style="width:800px;margin:auto;"><style>.indent{display:inline-block;margin:0 0 0 20px;font-size: 16px;}</style>'
     for func_name, url, docstring in funcs_data:
-        html += f'<br><br><p style = "font-size: 20px;"><b><u>{func_name}</u></b></p><p class = "indent"><b>Description:</b> <br>{replace_lt_gt(docstring)} <br> <br> <b>URL:</b> <br>{replace_lt_gt(url)}</p>'
+        html += f'<br><br><p style = "font-size: 20px;"><b><u>{func_name}()</u></b></p><p class = "indent"><b>Description:</b> <br>{replace_lt_gt(docstring)} <br> <br> <b>URL:</b> <br>{replace_lt_gt(url)}</p>'
     html += '</div></body></html>'
     return html
         
