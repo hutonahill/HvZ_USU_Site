@@ -1415,10 +1415,10 @@ def help():
             funcs_data.append((func_name, url, docstring))
     
     # Generate the HTML response
-    html = '<html><body><div style="width:800px;margin:auto;"><style>.indent{display:inline-block;margin:0 0 0 20px;font-size: 16px;}</style>'
+    html = '<html> \n<body>\n  <div style="width:800px;margin:auto;">\n\n   <style>\n    .indent{display:inline-block;margin:0 0 0 20px;font-size: 16px;}\n   </style>'
     for func_name, url, docstring in funcs_data:
-        html += f'<br><br><p style = "font-size: 20px;"><b><u>{func_name}()</u></b></p><p class = "indent"><b>Description:</b> <br>{replace_lt_gt(docstring)} <br> <br> <b>URL:</b> <br>{replace_lt_gt(url)}</p>'
-    html += '</div></body></html>'
+        html += f'\n\n   <br>\n   <br>\n   <p style = "font-size: 20px;"><b><u>{func_name}()</u></b></p>\n   <p class = "indent"><b>Description:</b> \n   <br>{replace_newlines(replace_lt_gt(docstring))}\n   <br>\n   <br>\n   <b>URL:</b> <br>\n   {replace_lt_gt(url)}</p>'
+    html += '\n\n  </div>\n  </body>\n</html>'
     return html
         
 def replace_lt_gt(string:str):
@@ -1433,6 +1433,17 @@ def replace_lt_gt(string:str):
     """
     return string.replace('<', '&lt;').replace('>', '&gt;')
 
+def replace_newlines(text):
+    """
+    Replaces the string '\n' with the string '\\n' in the input text.
+
+    Parameters:
+        text (str): The input text to be processed.
+
+    Returns:
+        str: The processed text with '\n' replaced by '\\n'.
+    """
+    return text.replace('\n', '\\n')
 
 # if __name__ == "__main__":
 #     print(help())
