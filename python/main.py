@@ -152,9 +152,6 @@ def getAllUserData():
     return response
 setattr(getAllUserData, 'route', '/getAllUserData')
 
-
-
-
 @api.route('/SQL_SELECT/<querry>')
 def SQL_SELECT( query:str, params:tuple=None):
     """
@@ -275,7 +272,6 @@ def SQL_example():
 
     # Print the results
     print(result)
-    
 
 @api.route('/registerUser/<user_id>/<a_number>/<email>/<fname>/<callsign>/<lname>/<discord_id>/<phoneNumber>')
 @api.route('/registerUser/<user_id>/<a_number>/<email>/<fname>/<callsign>/<lname>')
@@ -315,7 +311,6 @@ def registerUser(user_id:str, a_number:str, email:str, callsign:str, fname:str, 
         else:
             return json.dump({"rowsEffected":result})
 setattr(registerUser, 'route', '/registerUser/<user_id>/<a_number>/<email>/<fname>/<callsign>/<lname>')
-
 
 @api.route('/newGame/<gameName>/<startTime>/<game_email_key>')
 def newGame(gameName:str, startTime:str, game_email_key:str):
@@ -781,7 +776,6 @@ def generateQRCode(url):
     return response
 generateQRCode.route = '/generateQRCode/<url>'
 
-
 @api.route('/getTagPageInfo/<user_id>') 
 def getTagPageInfo(user_id:str):
     '''
@@ -967,7 +961,6 @@ def getPlayer_id(user_id:str):
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 setattr(getPlayer_id, 'route', '/getPlayer_id/<user_id>')
-
 
 @api.route('/getPlayerName/<user_id>')
 def getPlayerName(user_id:str):
@@ -1167,8 +1160,6 @@ def setActiveGame(game_id:str):
     return response
 setattr(setActiveGame, 'route', '/setActiveGame/<game_id>')
 
-
-
 @api.route('/getAllGameData')
 def getAllGameData():
     '''
@@ -1218,10 +1209,6 @@ def getAllGameData():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 setattr(getAllGameData, 'route', '/getAllGameData')
-
-
-
-
 
 @api.route('/tagPlayer/<human_user_id>')
 def tagPlayer(human_user_id):
@@ -1302,6 +1289,8 @@ def tagPlayer(human_user_id):
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 setattr(tagPlayer, 'route', '/tagPlayer/<human_user_id>')
+
+
 
 def is_int(s):
     try:
